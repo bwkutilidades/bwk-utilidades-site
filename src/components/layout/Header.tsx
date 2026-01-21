@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, ShoppingCart, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,23 +9,75 @@ import bwkLogoHeader from "@/assets/bwk-logo-header.png";
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [solucoesOpen, setSolucoesOpen] = useState(false);
+  const [hidden, setHidden] = useState(false);
+  const lastScrollY = useRef(0);
   const location = useLocation();
   const { itemCount, toggleCart } = useCart();
   
   const isActive = (path: string) => location.pathname === path;
   const isSolucoesActive = location.pathname.startsWith("/solucoes");
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // Se o menu mobile está aberto, nunca esconder (evita UX ruim)
+      if (mobileMenuOpen) {
+        setHidden(false);
+        lastScrollY.current = window.scrollY;
+        return;
+      }
+
+      const currentY = window.scrollY;
+
+      // No topo: sempre visível
+      if (currentY <= 10) {
+        setHidden(false);
+        lastScrollY.current = currentY;
+        return;
+      }
+
+      const delta = currentY - lastScrollY.current;
+      const threshold = 5;
+
+      if (Math.abs(delta) < threshold) return;
+
+      // Scroll para baixo e passou do offset: esconder
+      if (delta > 0 && currentY > 80) {
+        setHidden(true);
+      }
+
+      // Scroll para cima: mostrar
+      if (delta < 0) {
+        setHidden(false);
+      }
+
+      lastScrollY.current = currentY;
+    };
+
+    lastScrollY.current = window.scrollY;
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [mobileMenuOpen]);
   
   return (
-    <header className="sticky top-0 z-50 bg-background border-b border-border shadow-sm">
-      <div className="container-bwk">
-        <div className="flex items-center justify-between h-16 md:h-20">
-          {/* Logo */}
-          <Link to="/" className="flex-shrink-0">
-            <img src={bwkLogoHeader} alt="BWK Utilidades" className="h-14 md:h-16 w-auto" />
-          </Link>
+    <>
+      {/* Spacer para evitar layout shift (header agora é fixed) */}
+      <div className="h-16 md:h-20" aria-hidden="true" />
+
+      <header
+        className={
+          "fixed top-0 left-0 right-0 z-50 bg-background border-b border-border transition-transform duration-300 ease-in-out will-change-transform " +
+          (hidden ? "-translate-y-[110%]" : "translate-y-0 shadow-sm")
+        }
+      >
+        <div className="container-bwk">
+          <div className="flex items-center justify-between h-16 md:h-20">
+            {/* Logo */}
+            <Link to="/" className="flex-shrink-0">
+              <img src={bwkLogoHeader} alt="BWK Utilidades" className="h-14 md:h-16 w-auto" />
+            </Link>
           
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-1">
+            {/* Desktop Navigation */}
+            <nav className="hidden lg:flex items-center gap-1">
             <Link
               to="/"
               className={`px-4 py-2 text-sm font-medium transition-colors hover:text-primary ${
@@ -121,8 +173,8 @@ export function Header() {
             </Link>
           </nav>
           
-          {/* Right Section */}
-          <div className="flex items-center gap-2">
+            {/* Right Section */}
+            <div className="flex items-center gap-2">
             {/* Cart Button */}
             <Button
               variant="ghost"
@@ -150,13 +202,13 @@ export function Header() {
               {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </Button>
           </div>
+          </div>
         </div>
-      </div>
       
-      {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <div className="lg:hidden border-t border-border bg-background">
-          <nav className="container-bwk py-4 space-y-1">
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden border-t border-border bg-background">
+            <nav className="container-bwk py-4 space-y-1">
             <Link
               to="/"
               className="block px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted"
@@ -206,9 +258,10 @@ export function Header() {
             >
               Contato
             </Link>
-          </nav>
-        </div>
-      )}
-    </header>
+            </nav>
+          </div>
+        )}
+      </header>
+    </>
   );
 }

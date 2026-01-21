@@ -150,27 +150,34 @@ export default function HomePage() {
       </section>
 
       {/* Differentials Section */}
-      <section className="section-padding bg-background">
+      <section className="section-padding bg-secondary text-secondary-foreground">
         <div className="container-bwk">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold">Diferenciais da BWK</h2>
-            <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
-              Por que escolher a BWK Utilidades para suas compras.
-            </p>
-          </div>
-          
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {siteConfig.differentials.map((diff, index) => (
-              <div key={index} className="flex gap-4 p-4">
-                <div className="flex-shrink-0">
-                  <Star className="h-6 w-6 text-primary" />
+          <div className="rounded-2xl border border-secondary-foreground/10 bg-secondary/60 p-8 md:p-10 relative overflow-hidden">
+            <div className="absolute inset-x-0 top-0 h-1 bg-primary" aria-hidden="true" />
+
+            <div className="text-center mb-10">
+              <h2 className="text-3xl md:text-4xl font-bold">Diferenciais da BWK</h2>
+              <p className="mt-4 text-secondary-foreground/75 max-w-2xl mx-auto">
+                Por que escolher a BWK Utilidades para suas compras.
+              </p>
+            </div>
+
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {siteConfig.differentials.map((diff, index) => (
+                <div
+                  key={index}
+                  className="flex gap-4 rounded-xl border border-secondary-foreground/10 bg-background/5 p-5"
+                >
+                  <div className="flex-shrink-0">
+                    <Star className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">{diff.title}</h4>
+                    <p className="text-sm text-secondary-foreground/75 mt-1">{diff.description}</p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-semibold">{diff.title}</h4>
-                  <p className="text-sm text-muted-foreground mt-1">{diff.description}</p>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </section>

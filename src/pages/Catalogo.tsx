@@ -8,6 +8,7 @@ import { Layout } from "@/components/layout/Layout";
 import { ProductCard } from "@/components/products/ProductCard";
 import { apiClient } from "@/lib/api-client";
 import { categories } from "@/data/categories";
+import { siteConfig } from "@/config/site";
 import type { Product, CategorySlug, ListProductsParams } from "@/lib/types";
 
 export default function CatalogoPage() {
@@ -69,13 +70,40 @@ export default function CatalogoPage() {
   
   return (
     <Layout>
-      <section className="section-padding bg-background min-h-screen">
+      <section className="section-padding bg-muted min-h-screen">
         <div className="container-bwk">
           <div className="mb-8">
             <h1 className="text-3xl md:text-4xl font-bold mb-2">Catálogo</h1>
             <p className="text-muted-foreground">
               {total} produto{total !== 1 ? "s" : ""} encontrado{total !== 1 ? "s" : ""}
             </p>
+          </div>
+
+          {/* Premium band (dark) */}
+          <div className="mb-8 rounded-2xl bg-secondary text-secondary-foreground border border-secondary-foreground/10 p-6 md:p-7 relative overflow-hidden">
+            <div className="absolute inset-x-0 top-0 h-1 bg-primary" aria-hidden="true" />
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <p className="text-sm text-secondary-foreground/75">Atendimento consultivo</p>
+                <h2 className="text-xl md:text-2xl font-bold">Precisa de orçamento ou compra em volume?</h2>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button asChild>
+                  <a href={siteConfig.contact.whatsapp} target="_blank" rel="noopener noreferrer">
+                    Falar no WhatsApp
+                  </a>
+                </Button>
+                <Button
+                  variant="outline"
+                  asChild
+                  className="border-secondary-foreground/40 text-secondary-foreground hover:bg-secondary-foreground/10"
+                >
+                  <a href={siteConfig.contact.whatsapp} target="_blank" rel="noopener noreferrer">
+                    Solicitar cotação
+                  </a>
+                </Button>
+              </div>
+            </div>
           </div>
           
           {/* Filters Bar */}
