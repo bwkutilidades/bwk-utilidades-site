@@ -13,12 +13,17 @@
     --bwk-white: 0 0% 100%;
     --bwk-gray: 0 0% 96%;
 
-    /* Surfaces / Neutrals (lighter, cleaner) */
-    --surface-1: 0 0% 100%; /* #FFFFFF */
-    --surface-2: 0 0% 98%;  /* #FAFAFA */
-    --text: 240 5% 4%;      /* #0A0A0B */
-    --text-muted: 0 0% 29%; /* #4A4A4A */
-    --border-soft: 0 0% 92%; /* #EAEAEA */
+    /* Surfaces / Neutrals (premium depth) */
+    --surface-1: 0 0% 100%;    /* #FFFFFF */
+    --surface-2: 0 0% 96.5%;   /* #F6F6F6 */
+    --surface-3: 0 0% 93.3%;   /* #EEEEEE */
+    --surface-dark: 240 5% 4%; /* #0A0A0B */
+
+    --text: 240 5% 4%;        /* #0A0A0B */
+    --text-muted: 0 0% 24.7%; /* #3F3F3F */
+    --text-inverse: 0 0% 100%; /* #FFFFFF */
+
+    --border-soft: 0 0% 89.8%; /* #E5E5E5 */
 
     --background: var(--surface-1);
     --foreground: var(--text);
@@ -32,8 +37,8 @@
     --primary: 51 99% 60%;
     --primary-foreground: 240 5% 4%;
 
-    --secondary: 240 5% 4%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: var(--surface-dark);
+    --secondary-foreground: var(--text-inverse);
 
     --muted: var(--surface-2);
     --muted-foreground: var(--text-muted);
