@@ -1,0 +1,208 @@
+import { Product } from "@/lib/types";
+
+export const products: Product[] = [
+  {
+    id: "1",
+    slug: "balde-graduado-plastico-azul-135l",
+    name: "Balde Graduado Plástico Azul com Bico e Alça",
+    description: "Balde plástico resistente com graduação em litros, bico para facilitar o despejo e alça ergonômica. Ideal para limpeza profissional e doméstica.",
+    price: 34.90,
+    category: "limpeza-e-higiene",
+    images: ["/placeholder.svg"],
+    specs: [
+      { label: "Capacidade", value: "13,5L" },
+      { label: "Dimensões", value: "29,5 x 31 cm" },
+      { label: "Material", value: "Plástico resistente" },
+      { label: "Cor", value: "Azul" },
+    ],
+    featured: true,
+    inStock: true,
+  },
+  {
+    id: "2",
+    slug: "rodo-limpa-vidro-microfibra-cabo-inox",
+    name: "Rodo Limpa Vidro com Microfibra e Cabo Inox Extensível",
+    description: "Rodo profissional para limpeza de vidros com pad de microfibra removível e cabo de inox extensível. Perfeito para janelas altas e fachadas.",
+    price: 89.90,
+    category: "limpeza-e-higiene",
+    images: ["/placeholder.svg"],
+    specs: [
+      { label: "Dimensões", value: "115 x 28 cm" },
+      { label: "Cabo", value: "Inox extensível" },
+      { label: "Refil", value: "Microfibra removível" },
+    ],
+    featured: true,
+    inStock: true,
+  },
+  {
+    id: "3",
+    slug: "vassoura-rodo-canto-cabo-inox",
+    name: "Vassoura Rodo de Canto com Cabo Inox",
+    description: "Vassoura ideal para cantos e rodapés com rodo de silicone traseiro para acabamento perfeito. Cabo em inox resistente.",
+    price: 54.90,
+    category: "limpeza-e-higiene",
+    images: ["/placeholder.svg"],
+    specs: [
+      { label: "Dimensões", value: "105 x 22 cm" },
+      { label: "Cabo", value: "Inox" },
+      { label: "Diferencial", value: "Rodo de silicone traseiro" },
+    ],
+    featured: true,
+    inStock: true,
+  },
+  {
+    id: "4",
+    slug: "esponja-magica-max-clean",
+    name: "Esponja Mágica Max Clean",
+    description: "Esponja de melamina para limpeza pesada. Remove manchas difíceis de paredes, pisos e superfícies sem uso de produtos químicos.",
+    price: 12.90,
+    category: "limpeza-e-higiene",
+    images: ["/placeholder.svg"],
+    specs: [
+      { label: "Dimensões", value: "10 x 7 x 2,5 cm" },
+      { label: "Material", value: "Melamina" },
+      { label: "Uso", value: "Manchas difíceis" },
+    ],
+    featured: false,
+    inStock: true,
+  },
+  {
+    id: "5",
+    slug: "bucha-magica-max-clean",
+    name: "Bucha Mágica Max Clean",
+    description: "Bucha de melamina versão reforçada para limpeza intensa. Maior durabilidade e poder de limpeza.",
+    price: 14.90,
+    category: "limpeza-e-higiene",
+    images: ["/placeholder.svg"],
+    specs: [
+      { label: "Dimensões", value: "10 x 7 x 3 cm" },
+      { label: "Material", value: "Melamina reforçada" },
+    ],
+    featured: false,
+    inStock: true,
+  },
+  {
+    id: "6",
+    slug: "suporte-porta-vassoura-branco",
+    name: "Suporte Porta Vassoura Branco",
+    description: "Organizador de parede para vassouras e rodos com 4 encaixes e 5 ganchos. Suporta até 5kg, instalação simples.",
+    price: 39.90,
+    category: "organizacao-e-utilidades",
+    images: ["/placeholder.svg"],
+    specs: [
+      { label: "Dimensões", value: "34 x 5 x 5 cm" },
+      { label: "Encaixes", value: "4 encaixes + 5 ganchos" },
+      { label: "Capacidade", value: "Até 5 kg" },
+      { label: "Cor", value: "Branco" },
+    ],
+    featured: true,
+    inStock: true,
+  },
+  {
+    id: "7",
+    slug: "porta-caneta-aramado-rosa",
+    name: "Porta-Caneta Aramado Rosa",
+    description: "Porta-caneta em arame revestido, design moderno e elegante. Perfeito para escritórios e home office.",
+    price: 19.90,
+    category: "organizacao-e-utilidades",
+    images: ["/placeholder.svg"],
+    specs: [
+      { label: "Dimensões", value: "9,5 x 8 cm" },
+      { label: "Material", value: "Arame revestido" },
+      { label: "Cor", value: "Rosa" },
+    ],
+    featured: false,
+    inStock: true,
+    variants: [
+      { id: "7-rosa", name: "Rosa", inStock: true },
+      { id: "7-azul", name: "Azul", inStock: true },
+      { id: "7-roxo", name: "Roxo", inStock: true },
+    ],
+  },
+  {
+    id: "8",
+    slug: "balde-gelo-aluminio-3l-heineken",
+    name: "Balde de Gelo Alumínio 3L - Heineken",
+    description: "Balde de gelo em alumínio personalizado Heineken. Mantém bebidas geladas por mais tempo, perfeito para bares e eventos.",
+    price: 79.90,
+    category: "cozinha-e-bar",
+    images: ["/placeholder.svg"],
+    specs: [
+      { label: "Capacidade", value: "3L" },
+      { label: "Dimensões", value: "17 x 19 cm" },
+      { label: "Material", value: "Alumínio" },
+      { label: "Personalização", value: "Heineken" },
+    ],
+    featured: true,
+    inStock: true,
+    variants: [
+      { id: "8-heineken", name: "Heineken", inStock: true },
+      { id: "8-corona", name: "Corona", inStock: true },
+      { id: "8-jack", name: "Jack Daniels", inStock: true },
+    ],
+  },
+  {
+    id: "9",
+    slug: "copo-vidro-parede-dupla-140ml-kit2",
+    name: "Copo de Vidro Parede Dupla Kit 2 unidades",
+    description: "Kit com 2 copos de vidro borossilicato com parede dupla. Mantém a temperatura da bebida e não esquenta na mão.",
+    price: 69.90,
+    category: "cozinha-e-bar",
+    images: ["/placeholder.svg"],
+    specs: [
+      { label: "Capacidade", value: "140 ml cada" },
+      { label: "Altura", value: "8 cm" },
+      { label: "Diâmetro Boca", value: "8,5 cm" },
+      { label: "Material", value: "Vidro borossilicato" },
+      { label: "Quantidade", value: "2 unidades" },
+    ],
+    featured: true,
+    inStock: true,
+  },
+  {
+    id: "10",
+    slug: "faca-sushi-inox-8-shark",
+    name: 'Faca de Sushi Inox 8" Shark',
+    description: "Faca profissional para sushi em aço inox de alta qualidade. Lâmina afiada e cabo ergonômico em plástico resistente.",
+    price: 129.90,
+    category: "cozinha-e-bar",
+    images: ["/placeholder.svg"],
+    specs: [
+      { label: "Comprimento Total", value: "32,5 cm" },
+      { label: "Lâmina", value: '8" (20 cm)' },
+      { label: "Material Lâmina", value: "Aço Inox" },
+      { label: "Cabo", value: "Plástico ergonômico" },
+    ],
+    featured: false,
+    inStock: true,
+  },
+  {
+    id: "11",
+    slug: "kit-churrasco-faca-garfo-inox",
+    name: 'Kit Churrasco Faca 7" + Garfo 5" Inox',
+    description: "Kit churrasco completo com faca 7 polegadas e garfo 5 polegadas em aço inox. Cabo branco ergonômico.",
+    price: 89.90,
+    category: "cozinha-e-bar",
+    images: ["/placeholder.svg"],
+    specs: [
+      { label: "Faca", value: '7" (18 cm)' },
+      { label: "Garfo", value: '5" (13 cm)' },
+      { label: "Material", value: "Aço Inox" },
+      { label: "Cabo", value: "Branco" },
+    ],
+    featured: true,
+    inStock: true,
+  },
+];
+
+export function getProductBySlug(slug: string): Product | undefined {
+  return products.find((p) => p.slug === slug);
+}
+
+export function getFeaturedProducts(): Product[] {
+  return products.filter((p) => p.featured);
+}
+
+export function getProductsByCategory(categorySlug: string): Product[] {
+  return products.filter((p) => p.category === categorySlug);
+}
