@@ -10,7 +10,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
           {/* Brand Column */}
           <div className="space-y-4">
-            <img src={bwkLogo} alt="BWK Utilidades" className="h-12 w-auto brightness-0 invert" />
+            <img src={bwkLogo} alt="BWK Utilidades" className="h-16 w-auto" />
             <p className="text-sm text-muted-foreground">
               {siteConfig.description}. Atendemos B2B, e-commerce e licitações em todo o Brasil.
             </p>

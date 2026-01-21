@@ -81,7 +81,7 @@ export default function OrderConfirmationPage() {
           <div className="bg-card border border-border rounded-xl p-6 mb-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <img src={bwkLogo} alt="BWK" className="h-8 w-auto" />
+                <img src={bwkLogo} alt="BWK" className="h-12 w-auto" />
                 <div>
                   <p className="font-semibold">Pedido #{order.id}</p>
                   <p className="text-xs text-muted-foreground">

@@ -98,7 +98,7 @@ export default function CheckoutPage() {
     <Layout>
       <div className="container-bwk py-8">
         <div className="flex items-center gap-3 mb-8">
-          <img src={bwkLogo} alt="BWK" className="h-8 w-auto" />
+          <img src={bwkLogo} alt="BWK" className="h-12 w-auto" />
           <h1 className="text-2xl font-bold">Checkout</h1>
         </div>
         
