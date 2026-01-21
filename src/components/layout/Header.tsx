@@ -4,7 +4,7 @@ import { Menu, X, ShoppingCart, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
 import { siteConfig } from "@/config/site";
-import bwkLogo from "@/assets/bwk-logo.png";
+import bwkLogoHeader from "@/assets/bwk-logo-header.png";
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -21,7 +21,7 @@ export function Header() {
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <Link to="/" className="flex-shrink-0">
-            <img src={bwkLogo} alt="BWK Utilidades" className="h-14 md:h-16 w-auto" />
+            <img src={bwkLogoHeader} alt="BWK Utilidades" className="h-14 md:h-16 w-auto" />
           </Link>
           
           {/* Desktop Navigation */}
