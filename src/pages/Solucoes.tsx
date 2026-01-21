@@ -25,7 +25,9 @@ export default function SolucoesPage() {
                 to={`/solucoes/${category.slug}`}
                 className="group bg-card border border-border rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300"
               >
-                <div className="aspect-video bg-secondary" />
+                <div className="aspect-video bg-muted relative">
+                  <div className="absolute inset-x-0 top-0 h-1 bg-primary" aria-hidden="true" />
+                </div>
                 <div className="p-6">
                   <h2 className="text-xl font-semibold group-hover:text-primary transition-colors">
                     {category.name}

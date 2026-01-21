@@ -9,11 +9,11 @@ export default function SobrePage() {
   return (
     <Layout>
       {/* Hero */}
-      <section className="bg-secondary py-16 md:py-24">
+      <section className="bg-muted py-16 md:py-24 border-b border-border">
         <div className="container-bwk">
           <div className="max-w-3xl">
             <img src={bwkLogo} alt="BWK Utilidades" className="h-16 w-auto mb-6" />
-            <h1 className="text-4xl md:text-5xl font-bold text-secondary-foreground mb-4">
+            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
               Sobre a <span className="text-primary">BWK Utilidades</span>
             </h1>
             <p className="text-lg text-muted-foreground">
@@ -70,8 +70,8 @@ export default function SobrePage() {
           
           <div className="grid md:grid-cols-3 gap-8">
             <div className="text-center">
-              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-primary-foreground">B2B</span>
+              <div className="w-16 h-16 bg-primary/10 border border-border rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl font-bold text-primary">B2B</span>
               </div>
               <h3 className="font-semibold text-lg mb-2">Empresas</h3>
               <p className="text-sm text-muted-foreground">
@@ -79,8 +79,8 @@ export default function SobrePage() {
               </p>
             </div>
             <div className="text-center">
-              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-xl font-bold text-primary-foreground">E-com</span>
+              <div className="w-16 h-16 bg-primary/10 border border-border rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-xl font-bold text-primary">E-com</span>
               </div>
               <h3 className="font-semibold text-lg mb-2">E-commerce</h3>
               <p className="text-sm text-muted-foreground">
@@ -88,8 +88,8 @@ export default function SobrePage() {
               </p>
             </div>
             <div className="text-center">
-              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-xl font-bold text-primary-foreground">Gov</span>
+              <div className="w-16 h-16 bg-primary/10 border border-border rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-xl font-bold text-primary">Gov</span>
               </div>
               <h3 className="font-semibold text-lg mb-2">Licitações</h3>
               <p className="text-sm text-muted-foreground">

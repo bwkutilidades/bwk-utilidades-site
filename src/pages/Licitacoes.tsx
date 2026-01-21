@@ -8,10 +8,10 @@ export default function LicitacoesPage() {
   return (
     <Layout>
       {/* Hero */}
-      <section className="bg-secondary py-16 md:py-24">
+      <section className="bg-muted py-16 md:py-24 border-b border-border">
         <div className="container-bwk">
           <div className="max-w-3xl">
-            <h1 className="text-4xl md:text-5xl font-bold text-secondary-foreground mb-4">
+            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
               Licitações <span className="text-primary">Públicas</span>
             </h1>
             <p className="text-lg text-muted-foreground">
@@ -72,23 +72,23 @@ export default function LicitacoesPage() {
       </section>
       
       {/* CTA */}
-      <section className="section-padding bg-primary">
+      <section className="section-padding bg-background border-t-4 border-primary">
         <div className="container-bwk text-center">
-          <h2 className="text-3xl font-bold text-primary-foreground mb-4">
+          <h2 className="text-3xl font-bold mb-4">
             Interessado em participar de uma licitação conosco?
           </h2>
-          <p className="text-primary-foreground/80 mb-8 max-w-2xl mx-auto">
+          <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
             Entre em contato para solicitar nossa documentação ou tirar dúvidas sobre fornecimento.
           </p>
           
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Button size="lg" variant="secondary" asChild>
+            <Button size="lg" asChild>
               <a href={siteConfig.contact.whatsapp} target="_blank" rel="noopener noreferrer">
                 <Phone className="mr-2 h-5 w-5" />
                 WhatsApp
               </a>
             </Button>
-            <Button size="lg" variant="outline" className="bg-transparent border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary" asChild>
+            <Button size="lg" variant="outline" asChild>
               <a href={`mailto:${siteConfig.contact.email}`}>
                 <Mail className="mr-2 h-5 w-5" />
                 E-mail

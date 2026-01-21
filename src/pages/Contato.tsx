@@ -25,10 +25,10 @@ export default function ContatoPage() {
   return (
     <Layout>
       {/* Hero */}
-      <section className="bg-secondary py-16 md:py-24">
+      <section className="bg-muted py-16 md:py-24 border-b border-border">
         <div className="container-bwk">
           <div className="max-w-3xl">
-            <h1 className="text-4xl md:text-5xl font-bold text-secondary-foreground mb-4">
+            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
               Fale <span className="text-primary">Conosco</span>
             </h1>
             <p className="text-lg text-muted-foreground">
@@ -51,15 +51,15 @@ export default function ContatoPage() {
                   href={siteConfig.contact.whatsapp}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-start gap-4 p-4 bg-green-50 border border-green-200 rounded-xl hover:bg-green-100 transition-colors"
+                  className="flex items-start gap-4 p-4 bg-muted border border-border rounded-xl hover:bg-background transition-colors"
                 >
-                  <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-                    <MessageCircle className="h-6 w-6 text-white" />
+                  <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                    <MessageCircle className="h-6 w-6 text-primary-foreground" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-green-800">WhatsApp</h3>
-                    <p className="text-green-700">{siteConfig.contact.phone}</p>
-                    <p className="text-sm text-green-600 mt-1">Atendimento rápido e personalizado</p>
+                    <h3 className="font-semibold">WhatsApp</h3>
+                    <p className="text-muted-foreground">{siteConfig.contact.phone}</p>
+                    <p className="text-sm text-muted-foreground mt-1">Atendimento rápido e personalizado</p>
                   </div>
                 </a>
                 

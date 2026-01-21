@@ -47,10 +47,10 @@ export default function B2BPage() {
   return (
     <Layout>
       {/* Hero */}
-      <section className="bg-secondary py-16 md:py-24">
+        <section className="bg-muted py-16 md:py-24 border-b border-border">
         <div className="container-bwk">
           <div className="max-w-3xl">
-            <h1 className="text-4xl md:text-5xl font-bold text-secondary-foreground mb-4">
+              <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
               Soluções <span className="text-primary">B2B</span> para sua Empresa
             </h1>
             <p className="text-lg text-muted-foreground">
@@ -88,8 +88,8 @@ export default function B2BPage() {
           <div className="grid md:grid-cols-3 gap-8">
             {steps.map((step, index) => (
               <div key={index} className="text-center">
-                <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                  <step.icon className="h-8 w-8 text-primary-foreground" />
+                <div className="w-16 h-16 bg-primary/10 border border-border rounded-full flex items-center justify-center mx-auto mb-4">
+                  <step.icon className="h-8 w-8 text-primary" />
                 </div>
                 <h3 className="font-semibold text-lg mb-2">{step.title}</h3>
                 <p className="text-sm text-muted-foreground">{step.description}</p>
@@ -132,10 +132,10 @@ export default function B2BPage() {
       </section>
       
       {/* Lead Form */}
-      <section className="section-padding bg-secondary">
+      <section className="section-padding bg-muted">
         <div className="container-bwk">
           <div className="max-w-2xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-4 text-secondary-foreground">
+            <h2 className="text-3xl font-bold text-center mb-4 text-foreground">
               Solicite um Orçamento
             </h2>
             <p className="text-center text-muted-foreground mb-8">
