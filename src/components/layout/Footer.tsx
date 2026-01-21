@@ -5,7 +5,10 @@ import bwkLogo from "@/assets/bwk-logo.png";
 
 export function Footer() {
   return (
-    <footer className="bg-secondary text-secondary-foreground">
+    <footer className="bg-background text-foreground">
+      {/* Brand stripe */}
+      <div className="h-2 bg-primary" aria-hidden="true" />
+
       <div className="container-bwk py-12 md:py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
           {/* Brand Column */}
@@ -56,27 +59,27 @@ export function Footer() {
             <h4 className="font-semibold mb-4">Navegação</h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/catalogo" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link to="/catalogo" className="text-sm text-muted-foreground hover:text-foreground hover:underline decoration-primary transition-colors">
                   Catálogo
                 </Link>
               </li>
               <li>
-                <Link to="/b2b" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link to="/b2b" className="text-sm text-muted-foreground hover:text-foreground hover:underline decoration-primary transition-colors">
                   Para Empresas
                 </Link>
               </li>
               <li>
-                <Link to="/licitacoes" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link to="/licitacoes" className="text-sm text-muted-foreground hover:text-foreground hover:underline decoration-primary transition-colors">
                   Licitações
                 </Link>
               </li>
               <li>
-                <Link to="/sobre" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link to="/sobre" className="text-sm text-muted-foreground hover:text-foreground hover:underline decoration-primary transition-colors">
                   Sobre a BWK
                 </Link>
               </li>
               <li>
-                <Link to="/contato" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link to="/contato" className="text-sm text-muted-foreground hover:text-foreground hover:underline decoration-primary transition-colors">
                   Contato
                 </Link>
               </li>
@@ -91,7 +94,7 @@ export function Footer() {
                 <li key={item.href}>
                   <Link
                     to={item.href}
-                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                    className="text-sm text-muted-foreground hover:text-foreground hover:underline decoration-primary transition-colors"
                   >
                     {item.label}
                   </Link>

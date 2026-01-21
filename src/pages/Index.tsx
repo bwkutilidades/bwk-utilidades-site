@@ -55,11 +55,11 @@ export default function HomePage() {
   return (
     <Layout>
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-secondary via-secondary to-foreground overflow-hidden">
-        <div className="absolute inset-0 bg-[url('/placeholder.svg')] opacity-5 bg-cover bg-center" />
+      <section className="relative bg-muted overflow-hidden border-b border-border">
+        <div className="absolute inset-0 bg-[url('/placeholder.svg')] opacity-[0.04] bg-cover bg-center" />
         <div className="container-bwk py-20 md:py-32 relative z-10">
           <div className="max-w-3xl">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-secondary-foreground leading-tight animate-fade-in">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight animate-fade-in">
               Insumos de{" "}
               <span className="text-primary">limpeza e higiene</span>
               <br />+ utilidades para empresas e consumidores
@@ -75,7 +75,7 @@ export default function HomePage() {
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" asChild className="text-base bg-transparent border-secondary-foreground text-secondary-foreground hover:bg-secondary-foreground hover:text-secondary">
+              <Button size="lg" variant="outline" asChild className="text-base">
                 <a href={siteConfig.contact.whatsapp} target="_blank" rel="noopener noreferrer">
                   Pedir Orçamento
                 </a>
@@ -134,11 +134,11 @@ export default function HomePage() {
               <Link
                 key={category.slug}
                 to={`/solucoes/${category.slug}`}
-                className="group relative overflow-hidden rounded-xl bg-secondary aspect-[4/3] flex items-end p-6 hover:shadow-xl transition-all duration-300"
+                className="group relative overflow-hidden rounded-xl bg-card border border-border aspect-[4/3] flex items-end p-6 hover:border-primary hover:shadow-lg transition-all duration-300"
               >
-                <div className="absolute inset-0 bg-gradient-to-t from-secondary via-secondary/80 to-transparent z-10" />
+                <div className="absolute inset-x-0 top-0 h-1 bg-primary" aria-hidden="true" />
                 <div className="relative z-20">
-                  <h3 className="text-xl font-semibold text-secondary-foreground group-hover:text-primary transition-colors">
+                  <h3 className="text-xl font-semibold group-hover:text-primary transition-colors">
                     {category.name}
                   </h3>
                   <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{category.description}</p>
@@ -211,8 +211,8 @@ export default function HomePage() {
           <div className="grid md:grid-cols-3 gap-8 mb-12">
             {steps.map((step, index) => (
               <div key={index} className="text-center">
-                <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                  <step.icon className="h-8 w-8 text-primary-foreground" />
+                <div className="w-16 h-16 bg-primary/10 border border-border rounded-full flex items-center justify-center mx-auto mb-4">
+                  <step.icon className="h-8 w-8 text-primary" />
                 </div>
                 <h4 className="font-semibold text-lg">{step.title}</h4>
                 <p className="text-sm text-muted-foreground mt-2">{step.description}</p>
@@ -246,19 +246,19 @@ export default function HomePage() {
       </section>
 
       {/* Final CTA */}
-      <section className="py-16 bg-primary">
+      <section className="py-16 bg-background border-t-4 border-primary">
         <div className="container-bwk text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-primary-foreground">
+          <h2 className="text-3xl md:text-4xl font-bold">
             Pronto para começar?
           </h2>
-          <p className="mt-4 text-primary-foreground/80 max-w-2xl mx-auto">
+          <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
             Entre em contato conosco ou navegue pelo catálogo para encontrar os melhores produtos.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
-            <Button size="lg" variant="secondary" asChild>
+            <Button size="lg" asChild>
               <Link to="/catalogo">Ver Catálogo</Link>
             </Button>
-            <Button size="lg" variant="outline" className="bg-transparent border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary" asChild>
+            <Button size="lg" variant="outline" asChild>
               <Link to="/contato">Fale Conosco</Link>
             </Button>
           </div>
