@@ -21,7 +21,7 @@ export function Header() {
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <Link to="/" className="flex-shrink-0">
-            <img src={bwkLogo} alt="BWK Utilidades" className="h-10 md:h-12 w-auto" />
+            <img src={bwkLogo} alt="BWK Utilidades" className="h-14 md:h-16 w-auto" />
           </Link>
           
           {/* Desktop Navigation */}
