@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, ShoppingCart, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
@@ -12,10 +12,31 @@ export function Header() {
   const [hidden, setHidden] = useState(false);
   const lastScrollY = useRef(0);
   const location = useLocation();
+  const navigate = useNavigate();
   const { itemCount, toggleCart } = useCart();
   
   const isActive = (path: string) => location.pathname === path;
   const isSolucoesActive = location.pathname.startsWith("/solucoes");
+
+  const handleLogoClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setMobileMenuOpen(false);
+    setSolucoesOpen(false);
+
+    // Já está na Home: faz scroll suave para o herói
+    if (location.pathname === "/") {
+      const el = document.getElementById("inicio");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      } else {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+      return;
+    }
+
+    // Em outras rotas: navega para Home com hash (compatível com refresh)
+    navigate("/#inicio");
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -72,7 +93,7 @@ export function Header() {
         <div className="container-bwk">
           <div className="flex items-center justify-between h-16 md:h-20">
             {/* Logo */}
-            <Link to="/" className="flex-shrink-0">
+            <Link to="/#inicio" className="flex-shrink-0" onClick={handleLogoClick}>
               <img src={bwkLogoHeader} alt="BWK Utilidades" className="h-14 md:h-16 w-auto" />
             </Link>
           

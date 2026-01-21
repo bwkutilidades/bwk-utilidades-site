@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import { useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, Building2, ShoppingBag, FileText, Package, Truck, Headset, CheckCircle, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/layout/Layout";
@@ -52,10 +53,22 @@ const steps = [
 ];
 
 export default function HomePage() {
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.hash === "#inicio") {
+      // Defer para garantir que o layout (incluindo o header fixo) já foi renderizado
+      requestAnimationFrame(() => {
+        const el = document.getElementById("inicio");
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+  }, [location.hash]);
+
   return (
     <Layout>
       {/* Hero Section */}
-      <section className="relative bg-muted overflow-hidden border-b border-border">
+      <section id="inicio" className="relative bg-muted overflow-hidden border-b border-border scroll-mt-24">
         <div className="absolute inset-0 bg-[url('/placeholder.svg')] opacity-[0.04] bg-cover bg-center" />
         <div className="container-bwk py-20 md:py-32 relative z-10">
           <div className="max-w-3xl">
@@ -150,14 +163,14 @@ export default function HomePage() {
       </section>
 
       {/* Differentials Section */}
-      <section className="section-padding bg-secondary text-secondary-foreground">
+      <section className="section-padding bg-muted">
         <div className="container-bwk">
-          <div className="rounded-2xl border border-secondary-foreground/10 bg-secondary/60 p-8 md:p-10 relative overflow-hidden">
+          <div className="rounded-2xl border border-border bg-card p-8 md:p-10 relative overflow-hidden">
             <div className="absolute inset-x-0 top-0 h-1 bg-primary" aria-hidden="true" />
 
             <div className="text-center mb-10">
               <h2 className="text-3xl md:text-4xl font-bold">Diferenciais da BWK</h2>
-              <p className="mt-4 text-secondary-foreground/75 max-w-2xl mx-auto">
+              <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
                 Por que escolher a BWK Utilidades para suas compras.
               </p>
             </div>
@@ -166,14 +179,14 @@ export default function HomePage() {
               {siteConfig.differentials.map((diff, index) => (
                 <div
                   key={index}
-                  className="flex gap-4 rounded-xl border border-secondary-foreground/10 bg-background/5 p-5"
+                  className="flex gap-4 rounded-xl border border-border bg-background p-5 shadow-sm"
                 >
                   <div className="flex-shrink-0">
                     <Star className="h-6 w-6 text-primary" />
                   </div>
                   <div>
                     <h4 className="font-semibold">{diff.title}</h4>
-                    <p className="text-sm text-secondary-foreground/75 mt-1">{diff.description}</p>
+                    <p className="text-sm text-muted-foreground mt-1">{diff.description}</p>
                   </div>
                 </div>
               ))}
@@ -253,21 +266,28 @@ export default function HomePage() {
       </section>
 
       {/* Final CTA */}
-      <section className="py-16 bg-background border-t-4 border-primary">
-        <div className="container-bwk text-center">
-          <h2 className="text-3xl md:text-4xl font-bold">
-            Pronto para começar?
-          </h2>
-          <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
-            Entre em contato conosco ou navegue pelo catálogo para encontrar os melhores produtos.
-          </p>
-          <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
-            <Button size="lg" asChild>
-              <Link to="/catalogo">Ver Catálogo</Link>
-            </Button>
-            <Button size="lg" variant="outline" asChild>
-              <Link to="/contato">Fale Conosco</Link>
-            </Button>
+      <section className="py-16 md:py-20 bg-primary text-primary-foreground">
+        <div className="container-bwk">
+          <div className="rounded-2xl border border-primary-foreground/10 bg-primary px-6 py-12 md:px-10 md:py-14 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold">
+              Pronto para começar?
+            </h2>
+            <p className="mt-4 text-primary-foreground/80 max-w-2xl mx-auto">
+              Entre em contato conosco ou navegue pelo catálogo para encontrar os melhores produtos.
+            </p>
+            <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
+              <Button size="lg" variant="secondary" asChild>
+                <Link to="/catalogo">Ver Catálogo</Link>
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="bg-transparent border-primary-foreground/60 text-primary-foreground hover:bg-primary-foreground hover:text-primary"
+                asChild
+              >
+                <Link to="/contato">Fale Conosco</Link>
+              </Button>
+            </div>
           </div>
         </div>
       </section>
