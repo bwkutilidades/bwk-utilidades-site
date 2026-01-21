@@ -72,23 +72,28 @@ export default function LicitacoesPage() {
       </section>
       
       {/* CTA */}
-      <section className="section-padding bg-background border-t-4 border-primary">
+      <section className="section-padding bg-primary text-primary-foreground">
         <div className="container-bwk text-center">
           <h2 className="text-3xl font-bold mb-4">
             Interessado em participar de uma licitação conosco?
           </h2>
-          <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
+          <p className="text-primary-foreground/80 mb-8 max-w-2xl mx-auto">
             Entre em contato para solicitar nossa documentação ou tirar dúvidas sobre fornecimento.
           </p>
           
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Button size="lg" asChild>
+            <Button size="lg" variant="secondary" asChild>
               <a href={siteConfig.contact.whatsapp} target="_blank" rel="noopener noreferrer">
                 <Phone className="mr-2 h-5 w-5" />
                 WhatsApp
               </a>
             </Button>
-            <Button size="lg" variant="outline" asChild>
+            <Button
+              size="lg"
+              variant="outline"
+              className="bg-transparent border-primary-foreground/60 text-primary-foreground hover:bg-primary-foreground hover:text-primary"
+              asChild
+            >
               <a href={`mailto:${siteConfig.contact.email}`}>
                 <Mail className="mr-2 h-5 w-5" />
                 E-mail
