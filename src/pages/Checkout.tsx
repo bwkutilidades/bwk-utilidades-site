@@ -9,7 +9,7 @@ import { Layout } from "@/components/layout/Layout";
 import { useCart } from "@/contexts/CartContext";
 import { apiClient } from "@/lib/api-client";
 import { formatPrice } from "@/lib/utils";
-import bwkLogo from "@/assets/bwk-logo.png";
+
 
 const SHIPPING_OPTIONS = [
   { id: "standard", name: "Entrega Padrão", price: 19.90, days: "5-10 dias úteis" },
@@ -97,10 +97,7 @@ export default function CheckoutPage() {
   return (
     <Layout>
       <div className="container-bwk py-8">
-        <div className="flex items-center gap-3 mb-8">
-          <img src={bwkLogo} alt="BWK" className="h-12 w-auto" />
-          <h1 className="text-2xl font-bold">Checkout</h1>
-        </div>
+        <h1 className="text-2xl md:text-3xl font-bold mb-8">Checkout</h1>
         
         <form onSubmit={handleSubmit}>
           <div className="grid lg:grid-cols-3 gap-8">

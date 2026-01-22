@@ -120,12 +120,12 @@ export default function CatalogoPage() {
               </div>
               
               <div className="flex flex-wrap gap-4">
-                <Select value={category} onValueChange={(v) => { setCategory(v); setPage(1); }}>
+                <Select value={category || "all"} onValueChange={(v) => { setCategory(v === "all" ? "" : v); setPage(1); }}>
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Categoria" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todas</SelectItem>
+                    <SelectItem value="all">Todas</SelectItem>
                     {categories.map((cat) => (
                       <SelectItem key={cat.slug} value={cat.slug}>{cat.name}</SelectItem>
                     ))}
