@@ -1,4 +1,6 @@
 // API Client interface - structured for easy swap to real backend
+const API_URL = import.meta.env.VITE_API_URL;
+
 import { products, getProductBySlug as getProduct, getProductsByCategory } from "@/data/products";
 import { categories } from "@/data/categories";
 import type { 
