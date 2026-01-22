@@ -49,7 +49,7 @@ export default function SolucoesPage() {
             </Button>
             <Button size="lg" variant="outline" asChild>
               <a href={siteConfig.contact.whatsapp} target="_blank" rel="noopener noreferrer">
-                Solicitar Orçamento
+                {siteConfig.ctaQuoteText}
               </a>
             </Button>
           </div>

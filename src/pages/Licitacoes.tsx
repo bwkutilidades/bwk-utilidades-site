@@ -85,7 +85,7 @@ export default function LicitacoesPage() {
             <Button size="lg" variant="secondary" asChild>
               <a href={siteConfig.contact.whatsapp} target="_blank" rel="noopener noreferrer">
                 <Phone className="mr-2 h-5 w-5" />
-                WhatsApp
+                {siteConfig.ctaQuoteText}
               </a>
             </Button>
             <Button

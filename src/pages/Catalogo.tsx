@@ -80,29 +80,18 @@ export default function CatalogoPage() {
           </div>
 
           {/* Premium band (dark) */}
-          <div className="mb-8 rounded-2xl bg-secondary text-secondary-foreground border border-secondary-foreground/10 p-6 md:p-7 relative overflow-hidden">
+          <div className="mb-8 rounded-2xl bg-secondary text-secondary-foreground p-6 md:p-7 relative overflow-hidden">
             <div className="absolute inset-x-0 top-0 h-1 bg-primary" aria-hidden="true" />
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
                 <p className="text-sm text-secondary-foreground/75">Atendimento consultivo</p>
                 <h2 className="text-xl md:text-2xl font-bold">Precisa de orçamento ou compra em volume?</h2>
               </div>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Button asChild>
-                  <a href={siteConfig.contact.whatsapp} target="_blank" rel="noopener noreferrer">
-                    Falar no WhatsApp
-                  </a>
-                </Button>
-                <Button
-                  variant="outline"
-                  asChild
-                  className="border-secondary-foreground/40 text-secondary-foreground hover:bg-secondary-foreground/10"
-                >
-                  <a href={siteConfig.contact.whatsapp} target="_blank" rel="noopener noreferrer">
-                    Solicitar cotação
-                  </a>
-                </Button>
-              </div>
+              <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90 w-fit">
+                <a href={siteConfig.contact.whatsapp} target="_blank" rel="noopener noreferrer">
+                  {siteConfig.ctaQuoteText}
+                </a>
+              </Button>
             </div>
           </div>
           
