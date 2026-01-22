@@ -267,27 +267,25 @@ export default function HomePage() {
 
       {/* Final CTA */}
       <section className="py-16 md:py-20 bg-primary text-primary-foreground">
-        <div className="container-bwk">
-          <div className="rounded-2xl border border-primary-foreground/10 bg-primary px-6 py-12 md:px-10 md:py-14 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold">
-              Pronto para começar?
-            </h2>
-            <p className="mt-4 text-primary-foreground/80 max-w-2xl mx-auto">
-              Entre em contato conosco ou navegue pelo catálogo para encontrar os melhores produtos.
-            </p>
-            <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
-              <Button size="lg" variant="secondary" asChild>
-                <Link to="/catalogo">Ver Catálogo</Link>
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="bg-transparent border-primary-foreground/60 text-primary-foreground hover:bg-primary-foreground hover:text-primary"
-                asChild
-              >
-                <Link to="/contato">Fale Conosco</Link>
-              </Button>
-            </div>
+        <div className="container-bwk text-center">
+          <h2 className="text-3xl md:text-4xl font-bold">
+            Pronto para começar?
+          </h2>
+          <p className="mt-4 text-primary-foreground/80 max-w-2xl mx-auto">
+            Entre em contato conosco ou navegue pelo catálogo para encontrar os melhores produtos.
+          </p>
+          <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
+            <Button size="lg" variant="secondary" asChild>
+              <Link to="/catalogo">Ver Catálogo</Link>
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              className="bg-transparent border-primary-foreground/60 text-primary-foreground hover:bg-primary-foreground hover:text-primary"
+              asChild
+            >
+              <Link to="/contato">Fale Conosco</Link>
+            </Button>
           </div>
         </div>
       </section>
