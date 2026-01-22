@@ -90,7 +90,7 @@ export default function HomePage() {
               </Button>
               <Button size="lg" variant="outline" asChild className="text-base">
                 <a href={siteConfig.contact.whatsapp} target="_blank" rel="noopener noreferrer">
-                  Pedir Orçamento
+                  {siteConfig.ctaQuoteText}
                 </a>
               </Button>
             </div>
@@ -257,7 +257,7 @@ export default function HomePage() {
               </p>
               <Button variant="secondary" asChild>
                 <a href={siteConfig.contact.whatsapp} target="_blank" rel="noopener noreferrer">
-                  Solicitar Orçamento
+                  {siteConfig.ctaQuoteText}
                 </a>
               </Button>
             </div>

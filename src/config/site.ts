@@ -4,9 +4,12 @@ export const siteConfig = {
   description: "Insumos de limpeza, higiene e utilidades para empresas e consumidores",
   url: import.meta.env.VITE_SITE_URL || "https://bwkutilidades.com.br",
   
+  // Standardized CTA text for quote requests
+  ctaQuoteText: "Solicitar cotação",
+  
   contact: {
-    whatsapp: import.meta.env.VITE_WHATSAPP_URL || "https://wa.me/5511999999999",
-    phone: "(11) 99999-9999",
+    whatsapp: "https://api.whatsapp.com/send/?phone=5511949848756",
+    phone: "(11) 94984-8756",
     email: "contato@bwkutilidades.com.br",
     address: {
       street: "Rua Exemplo, 123",

@@ -172,7 +172,7 @@ export default function ContatoPage() {
                 </div>
                 
                 <Button type="submit" size="lg" className="w-full">
-                  Enviar via WhatsApp
+                  Enviar mensagem
                 </Button>
               </form>
             </div>

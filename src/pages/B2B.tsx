@@ -271,7 +271,7 @@ export default function B2BPage() {
               </div>
               
               <Button type="submit" size="lg" className="w-full">
-                Enviar Solicitação via WhatsApp
+                {siteConfig.ctaQuoteText}
               </Button>
             </form>
           </div>
