@@ -18,11 +18,11 @@ export default function CatalogoPage() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [filtersOpen, setFiltersOpen] = useState(false);
-  
+
   const [search, setSearch] = useState(searchParams.get("busca") || "");
   const [category, setCategory] = useState<string>(searchParams.get("categoria") || "");
   const [sort, setSort] = useState<string>(searchParams.get("ordem") || "relevance");
-  
+
   const fetchProducts = async () => {
     setLoading(true);
     try {
@@ -33,7 +33,7 @@ export default function CatalogoPage() {
         category: category as CategorySlug || undefined,
         sort: sort as ListProductsParams["sort"],
       };
-      
+
       const result = await apiClient.listProducts(params);
       setProducts(result.data);
       setTotal(result.total);
@@ -43,11 +43,11 @@ export default function CatalogoPage() {
       setLoading(false);
     }
   };
-  
+
   useEffect(() => {
     fetchProducts();
   }, [page, search, category, sort]);
-  
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setPage(1);
@@ -57,7 +57,7 @@ export default function CatalogoPage() {
     if (sort !== "relevance") params.set("ordem", sort);
     setSearchParams(params);
   };
-  
+
   const clearFilters = () => {
     setSearch("");
     setCategory("");
@@ -65,9 +65,9 @@ export default function CatalogoPage() {
     setPage(1);
     setSearchParams({});
   };
-  
+
   const hasFilters = search || category || sort !== "relevance";
-  
+
   return (
     <Layout>
       <section className="section-padding bg-muted min-h-screen">
@@ -94,7 +94,7 @@ export default function CatalogoPage() {
               </Button>
             </div>
           </div>
-          
+
           {/* Filters Bar */}
           <div className="bg-card border border-border rounded-xl p-4 mb-8">
             <form onSubmit={handleSearch} className="flex flex-col lg:flex-row gap-4">
@@ -107,7 +107,7 @@ export default function CatalogoPage() {
                   onChange={(e) => setSearch(e.target.value)}
                 />
               </div>
-              
+
               <div className="flex flex-wrap gap-4">
                 <Select value={category || "all"} onValueChange={(v) => { setCategory(v === "all" ? "" : v); setPage(1); }}>
                   <SelectTrigger className="w-[180px]">
@@ -120,7 +120,7 @@ export default function CatalogoPage() {
                     ))}
                   </SelectContent>
                 </Select>
-                
+
                 <Select value={sort} onValueChange={(v) => { setSort(v); setPage(1); }}>
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Ordenar por" />
@@ -132,9 +132,9 @@ export default function CatalogoPage() {
                     <SelectItem value="name">Nome A-Z</SelectItem>
                   </SelectContent>
                 </Select>
-                
+
                 <Button type="submit">Buscar</Button>
-                
+
                 {hasFilters && (
                   <Button type="button" variant="ghost" onClick={clearFilters}>
                     <X className="h-4 w-4 mr-1" /> Limpar
@@ -143,7 +143,7 @@ export default function CatalogoPage() {
               </div>
             </form>
           </div>
-          
+
           {/* Products Grid */}
           {loading ? (
             <div className="flex justify-center items-center py-20">
@@ -152,6 +152,11 @@ export default function CatalogoPage() {
           ) : products.length === 0 ? (
             <div className="text-center py-20">
               <p className="text-muted-foreground text-lg">Nenhum produto encontrado.</p>
+              <p className="text-muted-foreground text-sm mt-2">
+                {hasFilters
+                  ? "Tente ajustar seus filtros de busca."
+                  : "Verifique se os produtos estão publicados no Shopify."}
+              </p>
               {hasFilters && (
                 <Button variant="outline" onClick={clearFilters} className="mt-4">
                   Limpar Filtros
@@ -165,7 +170,7 @@ export default function CatalogoPage() {
               ))}
             </div>
           )}
-          
+
           {/* Load More */}
           {products.length < total && (
             <div className="text-center mt-12">

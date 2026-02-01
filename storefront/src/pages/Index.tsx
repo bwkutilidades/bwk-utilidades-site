@@ -1,14 +1,12 @@
 import { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { ArrowRight, Building2, ShoppingBag, FileText, Package, Truck, Headset, CheckCircle, Star } from "lucide-react";
+import { ArrowRight, Building2, ShoppingBag, FileText, Package, Truck, CheckCircle, Star, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/layout/Layout";
 import { ProductCard } from "@/components/products/ProductCard";
 import { siteConfig } from "@/config/site";
 import { categories } from "@/data/categories";
-import { getFeaturedProducts } from "@/data/products";
-
-const featuredProducts = getFeaturedProducts();
+import { useShopifyFeaturedProducts } from "@/hooks/useShopifyProducts";
 
 const channels = [
   {
@@ -54,6 +52,7 @@ const steps = [
 
 export default function HomePage() {
   const location = useLocation();
+  const { products: featuredProducts, loading: productsLoading } = useShopifyFeaturedProducts(8);
 
   useEffect(() => {
     if (location.hash === "#inicio") {
@@ -108,7 +107,7 @@ export default function HomePage() {
               Três canais para atender às suas necessidades, seja você consumidor final, empresa ou órgão público.
             </p>
           </div>
-          
+
           <div className="grid md:grid-cols-3 gap-6">
             {channels.map((channel) => (
               <div
@@ -141,7 +140,7 @@ export default function HomePage() {
               Produtos selecionados para atender sua casa, empresa ou estabelecimento.
             </p>
           </div>
-          
+
           <div className="grid md:grid-cols-3 gap-6">
             {categories.map((category) => (
               <Link
@@ -209,12 +208,22 @@ export default function HomePage() {
               </Link>
             </Button>
           </div>
-          
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featuredProducts.slice(0, 8).map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+
+          {productsLoading ? (
+            <div className="flex justify-center items-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : featuredProducts.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">Nenhum produto disponível no momento.</p>
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {featuredProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -227,7 +236,7 @@ export default function HomePage() {
               Simples e rápido, para consumidores e empresas.
             </p>
           </div>
-          
+
           <div className="grid md:grid-cols-3 gap-8 mb-12">
             {steps.map((step, index) => (
               <div key={index} className="text-center">
@@ -239,7 +248,7 @@ export default function HomePage() {
               </div>
             ))}
           </div>
-          
+
           <div className="grid md:grid-cols-2 gap-6">
             <div className="bg-card border border-border rounded-xl p-6">
               <h4 className="font-semibold text-lg mb-2">Para Consumidores</h4>

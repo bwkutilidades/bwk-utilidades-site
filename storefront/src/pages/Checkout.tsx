@@ -1,44 +1,17 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { Loader2, ShoppingBag, Truck, CreditCard } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Loader2, ShoppingBag, ExternalLink, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Layout } from "@/components/layout/Layout";
 import { useCart } from "@/contexts/CartContext";
-import { apiClient } from "@/lib/api-client";
 import { formatPrice } from "@/lib/utils";
-
-
-const SHIPPING_OPTIONS = [
-  { id: "standard", name: "Entrega Padrão", price: 19.90, days: "5-10 dias úteis" },
-  { id: "express", name: "Entrega Expressa", price: 39.90, days: "2-3 dias úteis" },
-];
+import { createCart, type CartLineInput } from "@/lib/shopify";
 
 export default function CheckoutPage() {
-  const navigate = useNavigate();
   const { items, subtotal, clearCart } = useCart();
   const [loading, setLoading] = useState(false);
-  const [shipping, setShipping] = useState(SHIPPING_OPTIONS[0].id);
-  
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    cpfCnpj: "",
-    street: "",
-    number: "",
-    complement: "",
-    neighborhood: "",
-    city: "",
-    state: "",
-    zip: "",
-  });
-  
-  const selectedShipping = SHIPPING_OPTIONS.find((s) => s.id === shipping)!;
-  const total = subtotal + selectedShipping.price;
-  
+  const [error, setError] = useState<string | null>(null);
+
   if (items.length === 0) {
     return (
       <Layout>
@@ -52,265 +25,211 @@ export default function CheckoutPage() {
       </Layout>
     );
   }
-  
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+
+  const handleProceedToCheckout = async () => {
     setLoading(true);
-    
+    setError(null);
+
     try {
-      const customer = {
-        name: form.name,
-        email: form.email,
-        phone: form.phone,
-        cpfCnpj: form.cpfCnpj || undefined,
-        address: {
-          street: form.street,
-          number: form.number,
-          complement: form.complement || undefined,
-          neighborhood: form.neighborhood,
-          city: form.city,
-          state: form.state,
-          zip: form.zip,
-        },
-      };
-      
-      const cart = {
-        items,
-        subtotal,
-        shipping: selectedShipping.price,
-        total,
-      };
-      
-      const result = await apiClient.createCheckoutSession(cart, customer);
-      
-      if (result.success) {
-        clearCart();
-        navigate(`/pedido/${result.orderId}`);
+      // Build cart lines from local cart items
+      // We need to use Shopify variant IDs (merchandiseId)
+      const lines: CartLineInput[] = items.map((item) => {
+        // Priority: variantId (if user selected) > defaultVariantId > first variant from variants array
+        let merchandiseId = item.variantId;
+
+        if (!merchandiseId && item.product.defaultVariantId) {
+          merchandiseId = item.product.defaultVariantId;
+        }
+
+        if (!merchandiseId && item.product.variants?.[0]?.id) {
+          merchandiseId = item.product.variants[0].id;
+        }
+
+        if (!merchandiseId) {
+          // Fallback: this shouldn't happen with Shopify products
+          console.warn('[Checkout] No variant ID found for product:', item.product.name);
+          merchandiseId = item.product.id;
+        }
+
+        return {
+          merchandiseId,
+          quantity: item.quantity,
+        };
+      });
+
+      // Create Shopify cart
+      const cart = await createCart(lines);
+
+      if (!cart) {
+        setError("Não foi possível criar o carrinho. Verifique se os produtos estão disponíveis.");
+        return;
       }
-    } catch (error) {
-      console.error("Checkout failed:", error);
+
+      if (!cart.checkoutUrl) {
+        setError("URL de checkout não disponível. Tente novamente.");
+        return;
+      }
+
+      // Clear local cart before redirecting
+      clearCart();
+
+      // Redirect to Shopify checkout
+      window.location.assign(cart.checkoutUrl);
+    } catch (err) {
+      console.error("[Checkout] Error:", err);
+      setError("Ocorreu um erro ao processar o checkout. Tente novamente.");
     } finally {
       setLoading(false);
     }
   };
-  
+
   return (
     <Layout>
       <div className="container-bwk py-8">
         <h1 className="text-2xl md:text-3xl font-bold mb-8">Checkout</h1>
-        
-        <form onSubmit={handleSubmit}>
-          <div className="grid lg:grid-cols-3 gap-8">
-            {/* Form */}
-            <div className="lg:col-span-2 space-y-8">
-              {/* Contact Info */}
-              <div className="bg-card border border-border rounded-xl p-6">
-                <h2 className="text-lg font-semibold mb-4">Dados de Contato</h2>
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div className="sm:col-span-2 space-y-2">
-                    <Label htmlFor="name">Nome Completo *</Label>
-                    <Input
-                      id="name"
-                      required
-                      value={form.name}
-                      onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">E-mail *</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      required
-                      value={form.email}
-                      onChange={(e) => setForm({ ...form, email: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Telefone *</Label>
-                    <Input
-                      id="phone"
-                      type="tel"
-                      required
-                      placeholder="(11) 99999-9999"
-                      value={form.phone}
-                      onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="cpfCnpj">CPF/CNPJ</Label>
-                    <Input
-                      id="cpfCnpj"
-                      placeholder="Opcional"
-                      value={form.cpfCnpj}
-                      onChange={(e) => setForm({ ...form, cpfCnpj: e.target.value })}
-                    />
-                  </div>
+
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Info Section */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Redirect Notice */}
+            <div className="bg-primary/5 border border-primary/20 rounded-xl p-6">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <ExternalLink className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold mb-2">
+                    Pagamento Seguro via Shopify
+                  </h2>
+                  <p className="text-muted-foreground text-sm">
+                    Você será redirecionado para o checkout seguro da Shopify,
+                    onde poderá preencher seus dados de entrega e pagamento.
+                  </p>
+                  <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
+                    <li className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 bg-primary rounded-full" />
+                      Dados protegidos por criptografia SSL
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 bg-primary rounded-full" />
+                      Múltiplas formas de pagamento aceitas
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 bg-primary rounded-full" />
+                      Cálculo de frete automático
+                    </li>
+                  </ul>
                 </div>
               </div>
-              
-              {/* Address */}
-              <div className="bg-card border border-border rounded-xl p-6">
-                <h2 className="text-lg font-semibold mb-4">Endereço de Entrega</h2>
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="zip">CEP *</Label>
-                    <Input
-                      id="zip"
-                      required
-                      placeholder="00000-000"
-                      value={form.zip}
-                      onChange={(e) => setForm({ ...form, zip: e.target.value })}
-                    />
-                  </div>
-                  <div className="sm:col-span-2 space-y-2">
-                    <Label htmlFor="street">Rua *</Label>
-                    <Input
-                      id="street"
-                      required
-                      value={form.street}
-                      onChange={(e) => setForm({ ...form, street: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="number">Número *</Label>
-                    <Input
-                      id="number"
-                      required
-                      value={form.number}
-                      onChange={(e) => setForm({ ...form, number: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="complement">Complemento</Label>
-                    <Input
-                      id="complement"
-                      placeholder="Apto, bloco..."
-                      value={form.complement}
-                      onChange={(e) => setForm({ ...form, complement: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="neighborhood">Bairro *</Label>
-                    <Input
-                      id="neighborhood"
-                      required
-                      value={form.neighborhood}
-                      onChange={(e) => setForm({ ...form, neighborhood: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="city">Cidade *</Label>
-                    <Input
-                      id="city"
-                      required
-                      value={form.city}
-                      onChange={(e) => setForm({ ...form, city: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="state">Estado *</Label>
-                    <Input
-                      id="state"
-                      required
-                      maxLength={2}
-                      placeholder="SP"
-                      value={form.state}
-                      onChange={(e) => setForm({ ...form, state: e.target.value.toUpperCase() })}
-                    />
-                  </div>
-                </div>
-              </div>
-              
-              {/* Shipping */}
-              <div className="bg-card border border-border rounded-xl p-6">
-                <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                  <Truck className="h-5 w-5" /> Método de Entrega
-                </h2>
-                <RadioGroup value={shipping} onValueChange={setShipping}>
-                  {SHIPPING_OPTIONS.map((opt) => (
-                    <div
-                      key={opt.id}
-                      className={`flex items-center justify-between p-4 rounded-lg border cursor-pointer transition-colors ${
-                        shipping === opt.id ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
-                      }`}
-                      onClick={() => setShipping(opt.id)}
-                    >
-                      <div className="flex items-center gap-3">
-                        <RadioGroupItem value={opt.id} id={opt.id} />
-                        <div>
-                          <Label htmlFor={opt.id} className="cursor-pointer font-medium">{opt.name}</Label>
-                          <p className="text-sm text-muted-foreground">{opt.days}</p>
-                        </div>
-                      </div>
-                      <span className="font-semibold">{formatPrice(opt.price)}</span>
-                    </div>
-                  ))}
-                </RadioGroup>
-              </div>
-              
-              {/* Payment Placeholder */}
-              <div className="bg-card border border-border rounded-xl p-6">
-                <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                  <CreditCard className="h-5 w-5" /> Pagamento
-                </h2>
-                <div className="p-4 bg-muted rounded-lg text-center">
-                  <p className="text-muted-foreground">
-                    O pagamento será processado na próxima etapa.<br />
-                    <span className="text-xs">(Integração com gateway em desenvolvimento)</span>
+            </div>
+
+            {/* Error Message */}
+            {error && (
+              <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-4 flex items-start gap-3">
+                <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-destructive">{error}</p>
+                  <p className="text-xs text-destructive/80 mt-1">
+                    Se o problema persistir, entre em contato conosco.
                   </p>
                 </div>
               </div>
-            </div>
-            
-            {/* Summary */}
-            <div className="lg:col-span-1">
-              <div className="bg-card border border-border rounded-xl p-6 sticky top-24">
-                <h2 className="text-xl font-semibold mb-4">Resumo do Pedido</h2>
-                
-                <div className="space-y-3 mb-4 max-h-60 overflow-y-auto">
-                  {items.map((item) => (
-                    <div key={`${item.product.id}-${item.variantId || ""}`} className="flex gap-3">
-                      <div className="w-12 h-12 bg-muted rounded overflow-hidden flex-shrink-0">
-                        <img src={item.product.images[0]} alt="" className="w-full h-full object-cover" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium line-clamp-1">{item.product.name}</p>
-                        <p className="text-xs text-muted-foreground">Qtd: {item.quantity}</p>
-                      </div>
-                      <span className="text-sm font-medium">{formatPrice(item.product.price * item.quantity)}</span>
+            )}
+
+            {/* Cart Items Review */}
+            <div className="bg-card border border-border rounded-xl p-6">
+              <h2 className="text-lg font-semibold mb-4">Itens do Pedido</h2>
+              <div className="space-y-4">
+                {items.map((item) => (
+                  <div
+                    key={`${item.product.id}-${item.variantId || ""}`}
+                    className="flex gap-4"
+                  >
+                    <div className="w-16 h-16 bg-muted rounded-lg overflow-hidden flex-shrink-0">
+                      <img
+                        src={item.product.images[0]}
+                        alt={item.product.name}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
-                  ))}
-                </div>
-                
-                <hr className="border-border my-4" />
-                
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Subtotal</span>
-                    <span>{formatPrice(subtotal)}</span>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium text-sm line-clamp-2">
+                        {item.product.name}
+                      </h4>
+                      {item.variantId && item.product.variants && (
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {item.product.variants.find((v) => v.id === item.variantId)?.name}
+                        </p>
+                      )}
+                      <div className="flex items-center justify-between mt-2">
+                        <span className="text-xs text-muted-foreground">
+                          Qtd: {item.quantity}
+                        </span>
+                        <span className="font-medium text-sm">
+                          {formatPrice(item.product.price * item.quantity)}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Frete</span>
-                    <span>{formatPrice(selectedShipping.price)}</span>
-                  </div>
-                </div>
-                
-                <hr className="border-border my-4" />
-                
-                <div className="flex justify-between text-lg font-semibold mb-6">
-                  <span>Total</span>
-                  <span>{formatPrice(total)}</span>
-                </div>
-                
-                <Button type="submit" size="lg" className="w-full" disabled={loading}>
-                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Confirmar Pedido
-                </Button>
+                ))}
               </div>
             </div>
           </div>
-        </form>
+
+          {/* Summary Sidebar */}
+          <div className="lg:col-span-1">
+            <div className="bg-card border border-border rounded-xl p-6 sticky top-24">
+              <h2 className="text-xl font-semibold mb-4">Resumo</h2>
+
+              <div className="space-y-2 mb-4">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Subtotal</span>
+                  <span>{formatPrice(subtotal)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Frete</span>
+                  <span className="text-muted-foreground text-xs">
+                    Calculado no checkout
+                  </span>
+                </div>
+              </div>
+
+              <hr className="border-border my-4" />
+
+              <div className="flex justify-between text-lg font-semibold mb-6">
+                <span>Total</span>
+                <span>{formatPrice(subtotal)}</span>
+              </div>
+
+              <Button
+                size="lg"
+                className="w-full"
+                onClick={handleProceedToCheckout}
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Processando...
+                  </>
+                ) : (
+                  <>
+                    Ir para Pagamento
+                    <ExternalLink className="ml-2 h-4 w-4" />
+                  </>
+                )}
+              </Button>
+
+              <p className="text-xs text-muted-foreground text-center mt-4">
+                Você será redirecionado para o checkout seguro
+              </p>
+
+              <Button variant="ghost" asChild className="w-full mt-2">
+                <Link to="/carrinho">Voltar ao Carrinho</Link>
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
     </Layout>
   );

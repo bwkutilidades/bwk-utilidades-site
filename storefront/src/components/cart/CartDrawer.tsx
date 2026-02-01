@@ -1,13 +1,22 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { X, Plus, Minus, Trash2, ShoppingBag } from "lucide-react";
+import { Plus, Minus, Trash2, ShoppingBag, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useCart } from "@/contexts/CartContext";
+import { useShopifyCheckout } from "@/hooks/useShopifyCheckout";
 import { formatPrice } from "@/lib/utils";
 
 export function CartDrawer() {
   const { items, isOpen, setCartOpen, itemCount, subtotal, updateQuantity, removeItem } = useCart();
-  
+  const { isCheckingOut, error, startCheckout, clearError } = useShopifyCheckout();
+
+  const handleCheckout = async () => {
+    clearError();
+    await startCheckout();
+    // Note: startCheckout will redirect to Shopify, so we don't close the drawer
+  };
+
   return (
     <Sheet open={isOpen} onOpenChange={setCartOpen}>
       <SheetContent className="w-full sm:max-w-md flex flex-col">
@@ -17,7 +26,7 @@ export function CartDrawer() {
             Carrinho ({itemCount} {itemCount === 1 ? "item" : "itens"})
           </SheetTitle>
         </SheetHeader>
-        
+
         {items.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center text-center py-12">
             <ShoppingBag className="h-16 w-16 text-muted-foreground/30 mb-4" />
@@ -49,13 +58,14 @@ export function CartDrawer() {
                       </p>
                     )}
                     <p className="font-semibold text-primary mt-1">{formatPrice(item.product.price)}</p>
-                    
+
                     <div className="flex items-center justify-between mt-2">
                       <div className="flex items-center gap-1">
                         <Button
                           variant="outline"
                           size="icon"
                           className="h-7 w-7"
+                          disabled={isCheckingOut}
                           onClick={() => updateQuantity(item.product.id, item.quantity - 1, item.variantId)}
                         >
                           <Minus className="h-3 w-3" />
@@ -65,6 +75,7 @@ export function CartDrawer() {
                           variant="outline"
                           size="icon"
                           className="h-7 w-7"
+                          disabled={isCheckingOut}
                           onClick={() => updateQuantity(item.product.id, item.quantity + 1, item.variantId)}
                         >
                           <Plus className="h-3 w-3" />
@@ -74,6 +85,7 @@ export function CartDrawer() {
                         variant="ghost"
                         size="icon"
                         className="h-7 w-7 text-destructive hover:text-destructive"
+                        disabled={isCheckingOut}
                         onClick={() => removeItem(item.product.id, item.variantId)}
                       >
                         <Trash2 className="h-4 w-4" />
@@ -83,8 +95,15 @@ export function CartDrawer() {
                 </div>
               ))}
             </div>
-            
+
             <div className="border-t pt-4 space-y-4">
+              {error && (
+                <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/30 rounded-lg">
+                  <AlertCircle className="h-4 w-4 text-destructive flex-shrink-0 mt-0.5" />
+                  <p className="text-xs text-destructive">{error}</p>
+                </div>
+              )}
+
               <div className="flex justify-between text-lg font-semibold">
                 <span>Subtotal</span>
                 <span>{formatPrice(subtotal)}</span>
@@ -93,11 +112,22 @@ export function CartDrawer() {
                 Frete calculado no checkout
               </p>
               <div className="grid gap-2">
-                <Button asChild size="lg" onClick={() => setCartOpen(false)}>
+                <Button asChild size="lg" variant="outline" onClick={() => setCartOpen(false)}>
                   <Link to="/carrinho">Ver Carrinho</Link>
                 </Button>
-                <Button asChild variant="secondary" size="lg" onClick={() => setCartOpen(false)}>
-                  <Link to="/checkout">Finalizar Compra</Link>
+                <Button
+                  size="lg"
+                  onClick={handleCheckout}
+                  disabled={isCheckingOut}
+                >
+                  {isCheckingOut ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Processando...
+                    </>
+                  ) : (
+                    "Finalizar Compra"
+                  )}
                 </Button>
               </div>
             </div>

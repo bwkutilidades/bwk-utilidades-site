@@ -13,6 +13,8 @@ export interface Product {
   featured?: boolean;
   inStock: boolean;
   variants?: ProductVariant[];
+  /** Shopify variant ID for cart operations (gid://shopify/ProductVariant/xxx) */
+  defaultVariantId?: string;
 }
 
 export interface ProductSpec {
