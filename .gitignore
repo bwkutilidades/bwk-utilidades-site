@@ -1,0 +1,6 @@
+
+# local envs
+backend/.env
+storefront/.env
+backend/.medusa/
+backend/node_modules/
