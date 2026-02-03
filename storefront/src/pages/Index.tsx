@@ -145,7 +145,7 @@ export default function HomePage() {
             {categories.map((category) => (
               <Link
                 key={category.slug}
-                to={`/solucoes/${category.slug}`}
+                to={`/catalogo?collection=${category.slug}`}
                 className="group relative overflow-hidden rounded-xl bg-card border border-border aspect-[4/3] flex items-end p-6 hover:border-primary hover:shadow-lg transition-all duration-300"
               >
                 <div className="absolute inset-x-0 top-0 h-1 bg-primary" aria-hidden="true" />

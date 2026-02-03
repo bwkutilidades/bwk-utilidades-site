@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
-import { Search, SlidersHorizontal, X, Loader2 } from "lucide-react";
+import { useSearchParams, Link } from "react-router-dom";
+import { Search, X, Loader2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Layout } from "@/components/layout/Layout";
 import { ProductCard } from "@/components/products/ProductCard";
 import { apiClient } from "@/lib/api-client";
+import { getProductsByCollectionHandle, getCategoryLabel, CATEGORY_MAP } from "@/lib/shopify";
 import { categories } from "@/data/categories";
 import { siteConfig } from "@/config/site";
 import type { Product, CategorySlug, ListProductsParams } from "@/lib/types";
@@ -17,7 +18,10 @@ export default function CatalogoPage() {
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [filtersOpen, setFiltersOpen] = useState(false);
+
+  // Read collection from URL (for category filtering via Shopify Collections)
+  const collectionHandle = searchParams.get("collection") || "";
+  const collectionLabel = collectionHandle ? getCategoryLabel(collectionHandle) : null;
 
   const [search, setSearch] = useState(searchParams.get("busca") || "");
   const [category, setCategory] = useState<string>(searchParams.get("categoria") || "");
@@ -26,19 +30,54 @@ export default function CatalogoPage() {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const params: ListProductsParams = {
-        page,
-        limit: 12,
-        search: search || undefined,
-        category: category as CategorySlug || undefined,
-        sort: sort as ListProductsParams["sort"],
-      };
+      // If filtering by Shopify collection
+      if (collectionHandle) {
+        const result = await getProductsByCollectionHandle(collectionHandle);
+        let filteredProducts = result.products;
 
-      const result = await apiClient.listProducts(params);
-      setProducts(result.data);
-      setTotal(result.total);
+        // Apply client-side sorting
+        switch (sort) {
+          case "price-asc":
+            filteredProducts = [...filteredProducts].sort((a, b) => a.price - b.price);
+            break;
+          case "price-desc":
+            filteredProducts = [...filteredProducts].sort((a, b) => b.price - a.price);
+            break;
+          case "name":
+            filteredProducts = [...filteredProducts].sort((a, b) => a.name.localeCompare(b.name));
+            break;
+        }
+
+        // Apply client-side search filter
+        if (search) {
+          const searchLower = search.toLowerCase();
+          filteredProducts = filteredProducts.filter(
+            (p) =>
+              p.name.toLowerCase().includes(searchLower) ||
+              p.description.toLowerCase().includes(searchLower)
+          );
+        }
+
+        setProducts(filteredProducts);
+        setTotal(filteredProducts.length);
+      } else {
+        // Regular listing via apiClient
+        const params: ListProductsParams = {
+          page,
+          limit: 12,
+          search: search || undefined,
+          category: category as CategorySlug || undefined,
+          sort: sort as ListProductsParams["sort"],
+        };
+
+        const result = await apiClient.listProducts(params);
+        setProducts(result.data);
+        setTotal(result.total);
+      }
     } catch (error) {
       console.error("Failed to fetch products:", error);
+      setProducts([]);
+      setTotal(0);
     } finally {
       setLoading(false);
     }
@@ -46,12 +85,13 @@ export default function CatalogoPage() {
 
   useEffect(() => {
     fetchProducts();
-  }, [page, search, category, sort]);
+  }, [page, search, category, sort, collectionHandle]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setPage(1);
     const params = new URLSearchParams();
+    if (collectionHandle) params.set("collection", collectionHandle);
     if (search) params.set("busca", search);
     if (category) params.set("categoria", category);
     if (sort !== "relevance") params.set("ordem", sort);
@@ -59,6 +99,19 @@ export default function CatalogoPage() {
   };
 
   const clearFilters = () => {
+    setSearch("");
+    setCategory("");
+    setSort("relevance");
+    setPage(1);
+    // Keep collection if it exists
+    if (collectionHandle) {
+      setSearchParams({ collection: collectionHandle });
+    } else {
+      setSearchParams({});
+    }
+  };
+
+  const clearCollection = () => {
     setSearch("");
     setCategory("");
     setSort("relevance");
@@ -73,7 +126,19 @@ export default function CatalogoPage() {
       <section className="section-padding bg-muted min-h-screen">
         <div className="container-bwk">
           <div className="mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold mb-2">Catálogo</h1>
+            {collectionLabel ? (
+              <>
+                <div className="flex items-center gap-2 mb-2">
+                  <Button variant="ghost" size="sm" onClick={clearCollection} className="p-0 h-auto">
+                    <ArrowLeft className="h-4 w-4 mr-1" />
+                    Voltar ao catálogo
+                  </Button>
+                </div>
+                <h1 className="text-3xl md:text-4xl font-bold mb-2">{collectionLabel}</h1>
+              </>
+            ) : (
+              <h1 className="text-3xl md:text-4xl font-bold mb-2">Catálogo</h1>
+            )}
             <p className="text-muted-foreground">
               {total} produto{total !== 1 ? "s" : ""} encontrado{total !== 1 ? "s" : ""}
             </p>
@@ -109,17 +174,20 @@ export default function CatalogoPage() {
               </div>
 
               <div className="flex flex-wrap gap-4">
-                <Select value={category || "all"} onValueChange={(v) => { setCategory(v === "all" ? "" : v); setPage(1); }}>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Categoria" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todas</SelectItem>
-                    {categories.map((cat) => (
-                      <SelectItem key={cat.slug} value={cat.slug}>{cat.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {/* Only show category filter when not in collection mode */}
+                {!collectionHandle && (
+                  <Select value={category || "all"} onValueChange={(v) => { setCategory(v === "all" ? "" : v); setPage(1); }}>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Categoria" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todas</SelectItem>
+                      {categories.map((cat) => (
+                        <SelectItem key={cat.slug} value={cat.slug}>{cat.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
 
                 <Select value={sort} onValueChange={(v) => { setSort(v); setPage(1); }}>
                   <SelectTrigger className="w-[180px]">
@@ -151,15 +219,26 @@ export default function CatalogoPage() {
             </div>
           ) : products.length === 0 ? (
             <div className="text-center py-20">
-              <p className="text-muted-foreground text-lg">Nenhum produto encontrado.</p>
+              <p className="text-muted-foreground text-lg">
+                {collectionHandle
+                  ? "Nenhum produto nessa categoria ainda…"
+                  : "Nenhum produto encontrado."}
+              </p>
               <p className="text-muted-foreground text-sm mt-2">
                 {hasFilters
                   ? "Tente ajustar seus filtros de busca."
-                  : "Verifique se os produtos estão publicados no Shopify."}
+                  : collectionHandle
+                    ? "Essa collection ainda não tem produtos associados no Shopify."
+                    : "Verifique se os produtos estão publicados no Shopify."}
               </p>
               {hasFilters && (
                 <Button variant="outline" onClick={clearFilters} className="mt-4">
                   Limpar Filtros
+                </Button>
+              )}
+              {collectionHandle && !hasFilters && (
+                <Button variant="outline" onClick={clearCollection} className="mt-4">
+                  Ver todos os produtos
                 </Button>
               )}
             </div>
@@ -171,8 +250,8 @@ export default function CatalogoPage() {
             </div>
           )}
 
-          {/* Load More */}
-          {products.length < total && (
+          {/* Load More - only show for non-collection mode */}
+          {!collectionHandle && products.length < total && (
             <div className="text-center mt-12">
               <Button
                 variant="outline"

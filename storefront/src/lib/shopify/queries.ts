@@ -295,3 +295,54 @@ export const CART_QUERY = `
     }
   }
 `;
+
+/**
+ * Query to get products from a collection by handle
+ * 
+ * @param handle - Collection handle/slug
+ * @param first - Number of products to fetch
+ */
+export const COLLECTION_BY_HANDLE_QUERY = `
+  query collectionByHandle($handle: String!, $first: Int!) {
+    collection(handle: $handle) {
+      id
+      title
+      handle
+      description
+      products(first: $first) {
+        edges {
+          node {
+            ${PRODUCT_FRAGMENT}
+            images(first: 1) {
+              edges {
+                node {
+                  url
+                  altText
+                }
+              }
+            }
+            variants(first: 1) {
+              edges {
+                node {
+                  id
+                  title
+                  availableForSale
+                  price {
+                    amount
+                    currencyCode
+                  }
+                }
+              }
+            }
+          }
+          cursor
+        }
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+      }
+    }
+  }
+`;
+

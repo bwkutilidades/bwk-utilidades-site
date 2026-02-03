@@ -6,10 +6,11 @@
  */
 
 import { shopifyFetch, isShopifyConfigured } from './client';
-import { PRODUCTS_QUERY, PRODUCT_BY_HANDLE_QUERY, SEARCH_PRODUCTS_QUERY } from './queries';
+import { PRODUCTS_QUERY, PRODUCT_BY_HANDLE_QUERY, SEARCH_PRODUCTS_QUERY, COLLECTION_BY_HANDLE_QUERY } from './queries';
 import type {
     ProductsQueryResponse,
     ProductByHandleQueryResponse,
+    CollectionByHandleQueryResponse,
     ShopifyProduct,
     ShopifyVariant,
 } from './types';
@@ -235,4 +236,44 @@ export async function getRelatedProducts(
         .filter(p => p.id !== productId)
         .filter(p => !category || p.category === category)
         .slice(0, limit);
+}
+
+/**
+ * Get products from a Shopify collection by handle
+ * 
+ * @param handle - Collection handle/slug (e.g., "limpeza-e-higiene")
+ * @param limit - Number of products to fetch
+ * @returns List of products in the collection
+ */
+export async function getProductsByCollectionHandle(
+    handle: string,
+    limit = 24
+): Promise<ListProductsResult> {
+    if (!isShopifyConfigured()) {
+        console.warn('[Shopify Service] Shopify not configured, returning empty results');
+        return { products: [], hasNextPage: false, endCursor: null };
+    }
+
+    try {
+        const response = await shopifyFetch<CollectionByHandleQueryResponse>(COLLECTION_BY_HANDLE_QUERY, {
+            handle,
+            first: limit,
+        });
+
+        if (!response.collection) {
+            console.warn(`[Shopify Service] Collection '${handle}' not found`);
+            return { products: [], hasNextPage: false, endCursor: null };
+        }
+
+        const products = response.collection.products.edges.map(edge => transformProduct(edge.node));
+
+        return {
+            products,
+            hasNextPage: response.collection.products.pageInfo.hasNextPage,
+            endCursor: response.collection.products.pageInfo.endCursor,
+        };
+    } catch (error) {
+        console.error('[Shopify Service] Error getting products by collection:', error);
+        return { products: [], hasNextPage: false, endCursor: null };
+    }
 }

@@ -106,6 +106,22 @@ export interface ProductByHandleQueryResponse {
 }
 
 // ========================================
+// Collection Types
+// ========================================
+
+export interface ShopifyCollection {
+    id: string;
+    title: string;
+    handle: string;
+    description: string;
+    products: ShopifyProductConnection;
+}
+
+export interface CollectionByHandleQueryResponse {
+    collection: ShopifyCollection | null;
+}
+
+// ========================================
 // Cart Types (Storefront Cart API)
 // ========================================
 

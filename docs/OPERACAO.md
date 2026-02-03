@@ -59,6 +59,57 @@ O frontend está em `/storefront`. É uma aplicação Vite + React que consome a
 
 ---
 
+## Shopify Collections (Categorias)
+
+O site usa **Shopify Collections** para organizar produtos em categorias.
+
+### Handles Oficiais
+
+Para o site funcionar corretamente, crie estas collections no Shopify Admin:
+
+| Collection (no Shopify) | Handle (URL) | Label no Site |
+|------------------------|--------------|---------------|
+| Limpeza e Higiene | `limpeza-e-higiene` | Limpeza e Higiene |
+| Organização e Utilidades | `organizacao-e-utilidades` | Organização e Utilidades |
+| Cozinha e Bar | `cozinha-e-bar` | Cozinha e Bar |
+
+### Como Criar Collections no Shopify
+
+1. Acesse **Shopify Admin** → **Products** → **Collections**
+2. Clique em **Create collection**
+3. Preencha:
+   - **Title**: Nome da coleção (ex: "Limpeza e Higiene")
+   - **Handle**: Edite manualmente para `limpeza-e-higiene`
+4. Em **Collection type**: escolha **Manual** ou **Automated**
+5. Adicione produtos à collection
+6. Salve
+
+### Como Adicionar Novas Categorias
+
+Para adicionar uma nova categoria:
+
+1. Crie a collection no Shopify com um handle único
+2. Edite `storefront/src/lib/shopify/categories.ts`:
+   ```typescript
+   export const CATEGORY_MAP = [
+     // ... categorias existentes
+     { label: "Nova Categoria", handle: "nova-categoria" },
+   ] as const;
+   ```
+3. Edite `storefront/src/data/categories.ts`:
+   ```typescript
+   export const categories: Category[] = [
+     // ... categorias existentes
+     {
+       slug: "nova-categoria",
+       name: "Nova Categoria",
+       description: "Descrição da categoria",
+     },
+   ];
+   ```
+
+---
+
 ## Como Testar com 1 Produto
 
 ### 1. Criar produto no Shopify
@@ -120,28 +171,8 @@ O checkout redireciona diretamente para o Shopify (sem página intermediária).
 - ✅ Redirect direto para checkout Shopify
 - ✅ Carrinho local NÃO é limpo antes do redirect (evita "flash" de carrinho vazio)
 
+---
 
-## Deploy no Google Cloud Run (Backend - Legado)
+## Deploy
 
-> **Nota**: O backend Medusa não é mais necessário para o storefront após a migração para Shopify.
-
-O backend Medusa está preparado para ser publicado no Cloud Run usando build automatizado do código-fonte.
-
-### 📜 Documentação de Variáveis
-Veja detalhes completos em [backend/CLOUD_RUN_ENV.md](file:///Users/kauanclaudinodossantos/Documents/Next%20Corporation/Clientes/Bwk%20Utilidades/bwk-utilidades-site-1/backend/CLOUD_RUN_ENV.md).
-
-### 🚀 Comando de Deploy
-
-Execute na raiz do monorepo:
-```bash
-gcloud run deploy bwk-medusa-api \
-  --source backend \
-  --region southamerica-east1 \
-  --allow-unauthenticated \
-  --min-instances 0 \
-  --max-instances 2 \
-  --memory 1Gi \
-  --cpu 1
-```
-
-
+Veja [DEPLOY_NETLIFY.md](./DEPLOY_NETLIFY.md) para instruções completas de deploy.

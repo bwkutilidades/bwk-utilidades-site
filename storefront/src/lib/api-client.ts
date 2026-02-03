@@ -11,13 +11,7 @@ import type {
   Category,
   ListProductsParams,
   PaginatedResponse,
-  Cart,
-  Customer,
-  Order,
 } from "@/lib/types";
-
-// Simulated delay for checkout operations (demo mode)
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const apiClient = {
   // Products - using Shopify Storefront API
@@ -105,46 +99,9 @@ export const apiClient = {
     }
   },
 
-  // Categories - still using local data
+  // Categories - using local data (matches Shopify collection handles)
   async listCategories(): Promise<Category[]> {
     return categories;
-  },
-
-
-  // Checkout
-  // TODO: Integrate with Shopify checkout
-  // When ready, use checkoutUrl from Shopify to redirect user to Shopify checkout
-  // Example: window.location.href = checkoutUrl;
-  async createCheckoutSession(cart: Cart, customer: Customer): Promise<{ orderId: string; success: boolean }> {
-    await delay(500);
-
-    // In real implementation, this would redirect to Shopify checkout
-    const orderId = `BWK-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
-
-    // Store order in localStorage for demo
-    const order: Order = {
-      id: orderId,
-      items: cart.items,
-      customer,
-      subtotal: cart.subtotal,
-      shipping: cart.shipping || 0,
-      total: cart.total,
-      status: "confirmed",
-      createdAt: new Date().toISOString(),
-    };
-
-    const orders = JSON.parse(localStorage.getItem("bwk-orders") || "[]");
-    orders.push(order);
-    localStorage.setItem("bwk-orders", JSON.stringify(orders));
-
-    return { orderId, success: true };
-  },
-
-  async getOrderStatus(orderId: string): Promise<Order | null> {
-    await delay(100);
-
-    const orders: Order[] = JSON.parse(localStorage.getItem("bwk-orders") || "[]");
-    return orders.find(o => o.id === orderId) || null;
   },
 };
 

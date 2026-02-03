@@ -3,15 +3,17 @@
  */
 
 export { shopifyFetch, isShopifyConfigured } from './client';
-export { PRODUCTS_QUERY, PRODUCT_BY_HANDLE_QUERY, SEARCH_PRODUCTS_QUERY } from './queries';
+export { PRODUCTS_QUERY, PRODUCT_BY_HANDLE_QUERY, SEARCH_PRODUCTS_QUERY, COLLECTION_BY_HANDLE_QUERY } from './queries';
 export {
     listProducts,
     getProductByHandle,
     getFeaturedProducts,
     getRelatedProducts,
+    getProductsByCollectionHandle,
     type ListProductsOptions,
     type ListProductsResult,
 } from './service';
+export { CATEGORY_MAP, getCategoryLabel, type CategoryHandle } from './categories';
 export {
     createCart,
     getCart,
