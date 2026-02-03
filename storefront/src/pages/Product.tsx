@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ShoppingCart, Minus, Plus, Truck, ArrowLeft, Loader2 } from "lucide-react";
+import { ShoppingCart, Minus, Plus, Truck, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Layout } from "@/components/layout/Layout";
 import { ProductCard } from "@/components/products/ProductCard";
-import { useCart } from "@/contexts/CartContext";
+import { AddedToCartModal } from "@/components/cart/AddedToCartModal";
+import { useAddToCartModal } from "@/hooks/useAddToCartModal";
 import { apiClient } from "@/lib/api-client";
 import { formatPrice } from "@/lib/utils";
 import type { Product } from "@/lib/types";
@@ -17,8 +18,9 @@ export default function ProductPage() {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [selectedVariant, setSelectedVariant] = useState<string>("");
-  const { addItem } = useCart();
-  
+
+  const { isModalOpen, addedProductName, closeModal, addToCartWithModal } = useAddToCartModal();
+
   useEffect(() => {
     const fetchProduct = async () => {
       if (!slug) return;
@@ -42,12 +44,12 @@ export default function ProductPage() {
     fetchProduct();
     setQuantity(1);
   }, [slug]);
-  
+
   const handleAddToCart = () => {
     if (!product) return;
-    addItem(product, quantity, selectedVariant || undefined);
+    addToCartWithModal(product, quantity, selectedVariant || undefined);
   };
-  
+
   if (loading) {
     return (
       <Layout>
@@ -57,7 +59,7 @@ export default function ProductPage() {
       </Layout>
     );
   }
-  
+
   if (!product) {
     return (
       <Layout>
@@ -70,7 +72,7 @@ export default function ProductPage() {
       </Layout>
     );
   }
-  
+
   return (
     <Layout>
       <div className="container-bwk py-8">
@@ -82,7 +84,7 @@ export default function ProductPage() {
           <span className="mx-2">/</span>
           <span className="text-foreground">{product.name}</span>
         </nav>
-        
+
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
           {/* Images */}
           <div className="space-y-4">
@@ -103,11 +105,11 @@ export default function ProductPage() {
               </div>
             )}
           </div>
-          
+
           {/* Details */}
           <div>
             <h1 className="text-2xl md:text-3xl font-bold mb-4">{product.name}</h1>
-            
+
             <div className="flex items-baseline gap-3 mb-6">
               <span className="text-3xl font-bold text-foreground">{formatPrice(product.price)}</span>
               {product.originalPrice && (
@@ -116,9 +118,9 @@ export default function ProductPage() {
                 </span>
               )}
             </div>
-            
+
             <p className="text-muted-foreground mb-6">{product.description}</p>
-            
+
             {/* Variants */}
             {product.variants && product.variants.length > 0 && (
               <div className="mb-6">
@@ -137,7 +139,7 @@ export default function ProductPage() {
                 </Select>
               </div>
             )}
-            
+
             {/* Quantity */}
             <div className="mb-6">
               <label className="text-sm font-medium mb-2 block">Quantidade</label>
@@ -159,7 +161,7 @@ export default function ProductPage() {
                 </Button>
               </div>
             </div>
-            
+
             {/* Add to Cart */}
             <Button
               size="lg"
@@ -168,9 +170,9 @@ export default function ProductPage() {
               disabled={!product.inStock}
             >
               <ShoppingCart className="mr-2 h-5 w-5" />
-              {product.inStock ? "Adicionar ao Carrinho" : "Produto Indisponível"}
+              {product.inStock ? "Comprar" : "Produto Indisponível"}
             </Button>
-            
+
             {/* Shipping Info */}
             <div className="p-4 bg-muted rounded-lg flex items-start gap-3">
               <Truck className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
@@ -179,7 +181,7 @@ export default function ProductPage() {
                 <p className="text-xs text-muted-foreground">Frete calculado no checkout</p>
               </div>
             </div>
-            
+
             {/* Specs */}
             {product.specs.length > 0 && (
               <div className="mt-8">
@@ -196,7 +198,7 @@ export default function ProductPage() {
             )}
           </div>
         </div>
-        
+
         {/* Related Products */}
         {relatedProducts.length > 0 && (
           <section className="mt-16">
@@ -209,6 +211,13 @@ export default function ProductPage() {
           </section>
         )}
       </div>
+
+      {/* Modal de produto adicionado */}
+      <AddedToCartModal
+        open={isModalOpen}
+        onOpenChange={(open) => !open && closeModal()}
+        productName={addedProductName || undefined}
+      />
     </Layout>
   );
 }
