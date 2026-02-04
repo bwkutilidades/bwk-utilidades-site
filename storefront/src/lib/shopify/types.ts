@@ -121,6 +121,28 @@ export interface CollectionByHandleQueryResponse {
     collection: ShopifyCollection | null;
 }
 
+/**
+ * Collection metadata for category cards (lighter version without products)
+ */
+export interface CollectionMetadata {
+    id: string;
+    title: string;
+    handle: string;
+    description: string;
+    image: {
+        url: string;
+        altText: string | null;
+        width: number;
+        height: number;
+    } | null;
+}
+
+export interface CollectionsMetadataQueryResponse {
+    limpezaEHigiene: CollectionMetadata | null;
+    organizacaoEUtilidades: CollectionMetadata | null;
+    cozinhaEBar: CollectionMetadata | null;
+}
+
 // ========================================
 // Cart Types (Storefront Cart API)
 // ========================================

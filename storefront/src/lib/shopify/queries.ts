@@ -346,3 +346,49 @@ export const COLLECTION_BY_HANDLE_QUERY = `
   }
 `;
 
+/**
+ * Query to get metadata for multiple collections by handle
+ * Used for the "Nossas Categorias" section on the Home page
+ * 
+ * Note: We use aliases to fetch all 3 collections in a single request
+ */
+export const COLLECTIONS_METADATA_QUERY = `
+  query collectionsMetadata {
+    limpezaEHigiene: collection(handle: "limpeza-e-higiene") {
+      id
+      title
+      handle
+      description
+      image {
+        url
+        altText
+        width
+        height
+      }
+    }
+    organizacaoEUtilidades: collection(handle: "organizacao-e-utilidades") {
+      id
+      title
+      handle
+      description
+      image {
+        url
+        altText
+        width
+        height
+      }
+    }
+    cozinhaEBar: collection(handle: "cozinha-e-bar") {
+      id
+      title
+      handle
+      description
+      image {
+        url
+        altText
+        width
+        height
+      }
+    }
+  }
+`;

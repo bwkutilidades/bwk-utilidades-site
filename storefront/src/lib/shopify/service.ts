@@ -6,14 +6,17 @@
  */
 
 import { shopifyFetch, isShopifyConfigured } from './client';
-import { PRODUCTS_QUERY, PRODUCT_BY_HANDLE_QUERY, SEARCH_PRODUCTS_QUERY, COLLECTION_BY_HANDLE_QUERY } from './queries';
+import { PRODUCTS_QUERY, PRODUCT_BY_HANDLE_QUERY, SEARCH_PRODUCTS_QUERY, COLLECTION_BY_HANDLE_QUERY, COLLECTIONS_METADATA_QUERY } from './queries';
 import type {
     ProductsQueryResponse,
     ProductByHandleQueryResponse,
     CollectionByHandleQueryResponse,
+    CollectionsMetadataQueryResponse,
+    CollectionMetadata,
     ShopifyProduct,
     ShopifyVariant,
 } from './types';
+import { getCategoryFallbackImage, CATEGORY_MAP, type CategoryHandle } from './categories';
 import type { Product, ProductVariant, CategorySlug } from '@/lib/types';
 
 // ========================================
@@ -275,5 +278,74 @@ export async function getProductsByCollectionHandle(
     } catch (error) {
         console.error('[Shopify Service] Error getting products by collection:', error);
         return { products: [], hasNextPage: false, endCursor: null };
+    }
+}
+
+// ========================================
+// Category Collections (for Home page)
+// ========================================
+
+export interface CategoryCollectionData {
+    handle: CategoryHandle;
+    title: string;
+    description: string;
+    imageUrl: string;
+    imageAlt: string;
+}
+
+/**
+ * Fetch metadata for all category collections
+ * Used by the "Nossas Categorias" section on the Home page
+ * 
+ * Returns Shopify collection images when available, with local fallbacks
+ */
+export async function getCategoryCollections(): Promise<CategoryCollectionData[]> {
+    if (!isShopifyConfigured()) {
+        console.warn('[Shopify Service] Shopify not configured, using fallback images');
+        return CATEGORY_MAP.map(cat => ({
+            handle: cat.handle,
+            title: cat.label,
+            description: '',
+            imageUrl: getCategoryFallbackImage(cat.handle),
+            imageAlt: cat.label,
+        }));
+    }
+
+    try {
+        const response = await shopifyFetch<CollectionsMetadataQueryResponse>(COLLECTIONS_METADATA_QUERY, {});
+
+        // Map aliases to handles
+        const aliasToHandle: Record<string, CategoryHandle> = {
+            limpezaEHigiene: 'limpeza-e-higiene',
+            organizacaoEUtilidades: 'organizacao-e-utilidades',
+            cozinhaEBar: 'cozinha-e-bar',
+        };
+
+        return CATEGORY_MAP.map(cat => {
+            // Find the matching collection data from response
+            const alias = Object.keys(aliasToHandle).find(key => aliasToHandle[key] === cat.handle);
+            const collectionData = alias ? response[alias as keyof CollectionsMetadataQueryResponse] : null;
+
+            // Use Shopify image if available, otherwise fallback
+            const hasShopifyImage = collectionData?.image?.url;
+
+            return {
+                handle: cat.handle,
+                title: collectionData?.title || cat.label,
+                description: collectionData?.description || '',
+                imageUrl: hasShopifyImage ? collectionData.image!.url : getCategoryFallbackImage(cat.handle),
+                imageAlt: collectionData?.image?.altText || cat.label,
+            };
+        });
+    } catch (error) {
+        console.error('[Shopify Service] Error fetching category collections:', error);
+        // Return fallback on error
+        return CATEGORY_MAP.map(cat => ({
+            handle: cat.handle,
+            title: cat.label,
+            description: '',
+            imageUrl: getCategoryFallbackImage(cat.handle),
+            imageAlt: cat.label,
+        }));
     }
 }

@@ -84,29 +84,68 @@ Para o site funcionar corretamente, crie estas collections no Shopify Admin:
 5. Adicione produtos à collection
 6. Salve
 
+### Imagens das Categorias (Home)
+
+Os cards de categoria na Home exibem imagens que podem vir de duas fontes:
+
+1. **Shopify (prioritário)**: Se a collection tiver uma imagem definida, ela será usada automaticamente
+2. **Fallback local**: Se não houver imagem no Shopify, usa imagens de `public/categories/`
+
+#### Como trocar a imagem via Shopify (recomendado)
+
+1. Acesse **Shopify Admin** → **Products** → **Collections**
+2. Clique na collection desejada (ex: "Limpeza e Higiene")
+3. Na seção **Collection image**, clique em **Add image**
+4. Faça upload da imagem desejada (recomendado: 800x600px, formato JPG/PNG/WebP)
+5. Salve
+
+> ✅ O site atualiza automaticamente sem precisar mexer no código!
+
+#### Imagens de fallback local
+
+Se preferir não usar imagem do Shopify, as imagens de fallback estão em:
+
+```
+storefront/public/categories/
+├── limpeza-e-higiene.jpg
+├── organizacao-e-utilidades.png
+└── cozinha-e-bar.png
+```
+
+Para trocar um fallback, substitua o arquivo mantendo o mesmo nome.
+
+O mapeamento está em `storefront/src/lib/shopify/categories.ts`:
+```typescript
+export const CATEGORY_IMAGE_FALLBACK: Record<CategoryHandle, string> = {
+    "limpeza-e-higiene": "/categories/limpeza-e-higiene.jpg",
+    "organizacao-e-utilidades": "/categories/organizacao-e-utilidades.png",
+    "cozinha-e-bar": "/categories/cozinha-e-bar.png",
+};
+```
+
 ### Como Adicionar Novas Categorias
 
 Para adicionar uma nova categoria:
 
 1. Crie a collection no Shopify com um handle único
-2. Edite `storefront/src/lib/shopify/categories.ts`:
+2. (Opcional) Adicione uma imagem à collection no Shopify Admin
+3. Adicione imagem de fallback em `storefront/public/categories/<handle>.jpg`
+4. Edite `storefront/src/lib/shopify/categories.ts`:
    ```typescript
    export const CATEGORY_MAP = [
      // ... categorias existentes
      { label: "Nova Categoria", handle: "nova-categoria" },
    ] as const;
+
+   export const CATEGORY_IMAGE_FALLBACK: Record<CategoryHandle, string> = {
+     // ... fallbacks existentes
+     "nova-categoria": "/categories/nova-categoria.jpg",
+   };
    ```
-3. Edite `storefront/src/data/categories.ts`:
-   ```typescript
-   export const categories: Category[] = [
-     // ... categorias existentes
-     {
-       slug: "nova-categoria",
-       name: "Nova Categoria",
-       description: "Descrição da categoria",
-     },
-   ];
-   ```
+5. Edite `storefront/src/lib/shopify/queries.ts`:
+   - Adicione um novo alias na query `COLLECTIONS_METADATA_QUERY`
+6. Edite `storefront/src/lib/shopify/types.ts`:
+   - Adicione o novo alias em `CollectionsMetadataQueryResponse`
 
 ---
 

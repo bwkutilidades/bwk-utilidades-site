@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/layout/Layout";
 import { ProductCard } from "@/components/products/ProductCard";
 import { siteConfig } from "@/config/site";
-import { categories } from "@/data/categories";
 import { useShopifyFeaturedProducts } from "@/hooks/useShopifyProducts";
+import { useCategoryCollections } from "@/hooks/useCategoryCollections";
 
 const channels = [
   {
@@ -53,6 +53,7 @@ const steps = [
 export default function HomePage() {
   const location = useLocation();
   const { products: featuredProducts, loading: productsLoading } = useShopifyFeaturedProducts(8);
+  const { collections: categoryCollections } = useCategoryCollections();
 
   useEffect(() => {
     if (location.hash === "#inicio") {
@@ -142,21 +143,49 @@ export default function HomePage() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
-            {categories.map((category) => (
-              <Link
-                key={category.slug}
-                to={`/catalogo?collection=${category.slug}`}
-                className="group relative overflow-hidden rounded-xl bg-card border border-border aspect-[4/3] flex items-end p-6 hover:border-primary hover:shadow-lg transition-all duration-300"
-              >
-                <div className="absolute inset-x-0 top-0 h-1 bg-primary" aria-hidden="true" />
-                <div className="relative z-20">
-                  <h3 className="text-xl font-semibold group-hover:text-primary transition-colors">
-                    {category.name}
-                  </h3>
-                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{category.description}</p>
+            {categoryCollections.length === 0 ? (
+              // Skeleton loading state
+              Array.from({ length: 3 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="relative overflow-hidden rounded-xl bg-card border border-border aspect-[4/3] animate-pulse"
+                >
+                  <div className="absolute inset-0 bg-muted" />
+                  <div className="absolute bottom-6 left-6 right-6">
+                    <div className="h-6 bg-muted-foreground/20 rounded w-2/3 mb-2" />
+                    <div className="h-4 bg-muted-foreground/10 rounded w-full" />
+                  </div>
                 </div>
-              </Link>
-            ))}
+              ))
+            ) : (
+              categoryCollections.map((collection) => (
+                <Link
+                  key={collection.handle}
+                  to={`/catalogo?collection=${collection.handle}`}
+                  className="group relative overflow-hidden rounded-xl bg-card border border-border aspect-[4/3] flex items-end hover:border-primary hover:shadow-lg transition-all duration-300"
+                >
+                  {/* Category Image */}
+                  <img
+                    src={collection.imageUrl}
+                    alt={collection.imageAlt}
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  {/* Gradient overlay for text readability */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+                  {/* Top accent bar */}
+                  <div className="absolute inset-x-0 top-0 h-1 bg-primary z-10" aria-hidden="true" />
+                  {/* Text content */}
+                  <div className="relative z-20 p-6">
+                    <h3 className="text-xl font-semibold text-white group-hover:text-primary transition-colors">
+                      {collection.title}
+                    </h3>
+                    {collection.description && (
+                      <p className="text-sm text-white/80 mt-1 line-clamp-2">{collection.description}</p>
+                    )}
+                  </div>
+                </Link>
+              ))
+            )}
           </div>
         </div>
       </section>
