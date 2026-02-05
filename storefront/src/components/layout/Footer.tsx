@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Instagram, Facebook, Linkedin, Mail, Phone, MapPin } from "lucide-react";
+import { Instagram, Linkedin, Mail, Phone } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import bwkLogo from "@/assets/bwk-logo.png";
 
@@ -29,17 +29,7 @@ export function Footer() {
                   <Instagram className="h-5 w-5" />
                 </a>
               )}
-              {siteConfig.social.facebook && (
-                <a
-                  href={siteConfig.social.facebook}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-2 rounded-full bg-muted hover:bg-primary hover:text-primary-foreground transition-colors"
-                  aria-label="Facebook"
-                >
-                  <Facebook className="h-5 w-5" />
-                </a>
-              )}
+
               {siteConfig.social.linkedin && (
                 <a
                   href={siteConfig.social.linkedin}
@@ -53,7 +43,7 @@ export function Footer() {
               )}
             </div>
           </div>
-          
+
           {/* Quick Links */}
           <div>
             <h4 className="font-semibold mb-4">Navegação</h4>
@@ -85,7 +75,7 @@ export function Footer() {
               </li>
             </ul>
           </div>
-          
+
           {/* Legal Links */}
           <div>
             <h4 className="font-semibold mb-4">Informações</h4>
@@ -102,7 +92,7 @@ export function Footer() {
               ))}
             </ul>
           </div>
-          
+
           {/* Contact */}
           <div>
             <h4 className="font-semibold mb-4">Contato</h4>
@@ -115,17 +105,11 @@ export function Footer() {
                 <Mail className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
                 <span className="text-sm text-muted-foreground">{siteConfig.contact.email}</span>
               </li>
-              <li className="flex items-start gap-3">
-                <MapPin className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-                <span className="text-sm text-muted-foreground">
-                  {siteConfig.contact.address.street}, {siteConfig.contact.address.neighborhood}<br />
-                  {siteConfig.contact.address.city} - {siteConfig.contact.address.state}
-                </span>
-              </li>
+
             </ul>
           </div>
         </div>
-        
+
         {/* Bottom Bar */}
         <div className="mt-12 pt-8 border-t border-border">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
