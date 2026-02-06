@@ -74,7 +74,7 @@ export default function HomePage() {
 
         {/* Background Image */}
         <img
-          src="/images/home/hero-bwk-organizacao.png"
+          src="/images/home/hero-bwk-1920x820.png"
           alt=""
           aria-hidden="true"
           className="absolute inset-0 w-full h-full object-cover object-[70%_50%] lg:object-[70%_50%]"
