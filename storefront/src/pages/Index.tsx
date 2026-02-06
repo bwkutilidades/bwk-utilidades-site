@@ -84,14 +84,15 @@ export default function HomePage() {
 
         {/* Overlay Layer A: Legibility gradient (foreground-based, dark) */}
         <div
-          className="absolute inset-0 z-10"
+          className="absolute inset-0 z-10 hidden lg:block"
           style={{
             background: `linear-gradient(
               to right,
-              hsl(var(--foreground) / 0.85) 0%,
-              hsl(var(--foreground) / 0.7) 30%,
-              hsl(var(--foreground) / 0.4) 60%,
-              hsl(var(--foreground) / 0.1) 100%
+              hsl(var(--foreground) / 0.92) 0%,
+              hsl(var(--foreground) / 0.85) 25%,
+              hsl(var(--foreground) / 0.6) 50%,
+              hsl(var(--foreground) / 0.3) 80%,
+              hsl(var(--foreground) / 0.15) 100%
             )`
           }}
         />
@@ -101,9 +102,10 @@ export default function HomePage() {
           style={{
             background: `linear-gradient(
               to bottom,
-              hsl(var(--foreground) / 0.85) 0%,
-              hsl(var(--foreground) / 0.6) 50%,
-              hsl(var(--foreground) / 0.3) 100%
+              hsl(var(--foreground) / 0.92) 0%,
+              hsl(var(--foreground) / 0.85) 30%,
+              hsl(var(--foreground) / 0.6) 60%,
+              hsl(var(--foreground) / 0.4) 100%
             )`
           }}
         />
@@ -148,8 +150,19 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Bottom gradient fade to next section */}
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent z-20" />
+        {/* Bottom gradient fade to next section - taller for smoother transition */}
+        <div
+          className="absolute bottom-0 left-0 right-0 h-40 z-20"
+          style={{
+            background: `linear-gradient(
+              to top,
+              hsl(var(--background)) 0%,
+              hsl(var(--background) / 0.8) 30%,
+              hsl(var(--background) / 0.4) 60%,
+              transparent 100%
+            )`
+          }}
+        />
       </section>
 
       {/* How BWK Serves Section */}
