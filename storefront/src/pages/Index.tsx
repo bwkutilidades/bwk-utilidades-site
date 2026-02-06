@@ -152,7 +152,7 @@ export default function HomePage() {
 
         {/* Bottom gradient fade to next section - taller for smoother transition */}
         <div
-          className="absolute bottom-0 left-0 right-0 h-40 z-20"
+          className="absolute bottom-0 left-0 right-0 h-40 z-20 pointer-events-none"
           style={{
             background: `linear-gradient(
               to top,
