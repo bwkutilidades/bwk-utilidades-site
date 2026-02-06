@@ -68,16 +68,67 @@ export default function HomePage() {
   return (
     <Layout>
       {/* Hero Section */}
-      <section id="inicio" className="relative bg-muted overflow-hidden border-b border-border scroll-mt-24">
-        <div className="absolute inset-0 bg-[url('/placeholder.svg')] opacity-[0.04] bg-cover bg-center" />
-        <div className="container-bwk py-20 md:py-32 relative z-10">
+      <section id="inicio" className="relative overflow-hidden border-b border-border scroll-mt-24">
+        {/* Fallback background color */}
+        <div className="absolute inset-0 bg-background" />
+
+        {/* Background Image */}
+        <img
+          src="/images/home/hero-bwk-organizacao.png"
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover object-[70%_50%] lg:object-[70%_50%]"
+          loading="eager"
+          fetchPriority="high"
+        />
+
+        {/* Overlay Layer A: Legibility gradient (foreground-based, dark) */}
+        <div
+          className="absolute inset-0 z-10"
+          style={{
+            background: `linear-gradient(
+              to right,
+              hsl(var(--foreground) / 0.85) 0%,
+              hsl(var(--foreground) / 0.7) 30%,
+              hsl(var(--foreground) / 0.4) 60%,
+              hsl(var(--foreground) / 0.1) 100%
+            )`
+          }}
+        />
+        {/* Mobile: vertical gradient */}
+        <div
+          className="absolute inset-0 z-10 lg:hidden"
+          style={{
+            background: `linear-gradient(
+              to bottom,
+              hsl(var(--foreground) / 0.85) 0%,
+              hsl(var(--foreground) / 0.6) 50%,
+              hsl(var(--foreground) / 0.3) 100%
+            )`
+          }}
+        />
+
+        {/* Overlay Layer B: Subtle primary glow (brand signature) */}
+        <div
+          className="absolute inset-0 z-10 pointer-events-none"
+          style={{
+            background: `radial-gradient(
+              ellipse 50% 60% at 20% 70%,
+              hsl(var(--primary) / 0.12) 0%,
+              transparent 70%
+            )`
+          }}
+        />
+
+        {/* Content */}
+        <div className="container-bwk py-20 md:py-32 relative z-20">
           <div className="max-w-3xl">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight animate-fade-in">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight animate-fade-in drop-shadow-lg">
               Insumos de{" "}
               <span className="text-primary">limpeza e higiene</span>
               <br />+ utilidades para empresas e consumidores
             </h1>
-            <p className="mt-6 text-lg md:text-xl text-muted-foreground max-w-2xl animate-fade-in" style={{ animationDelay: "0.1s" }}>
+            <p className="mt-6 text-lg md:text-xl text-white/90 max-w-2xl animate-fade-in drop-shadow-md" style={{ animationDelay: "0.1s" }}>
               A BWK é sua parceira em soluções de limpeza, organização e utilidades.
               Atendemos B2B, e-commerce e licitações públicas com qualidade e agilidade.
             </p>
@@ -88,7 +139,7 @@ export default function HomePage() {
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" asChild className="text-base">
+              <Button size="lg" variant="outline" asChild className="text-base bg-white/10 border-white/30 text-white hover:bg-white/20 hover:text-white">
                 <a href={siteConfig.contact.whatsapp} target="_blank" rel="noopener noreferrer">
                   {siteConfig.ctaQuoteText}
                 </a>
@@ -96,7 +147,9 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent" />
+
+        {/* Bottom gradient fade to next section */}
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent z-20" />
       </section>
 
       {/* How BWK Serves Section */}
