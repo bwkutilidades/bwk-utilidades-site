@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ShoppingCart, Minus, Plus, Truck, Loader2 } from "lucide-react";
+import { ShoppingCart, Minus, Plus, Truck, Loader2, ZoomIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Layout } from "@/components/layout/Layout";
 import { ProductCard } from "@/components/products/ProductCard";
+import { ImageZoomModal } from "@/components/products/ImageZoomModal";
 import { AddedToCartModal } from "@/components/cart/AddedToCartModal";
 import { useAddToCartModal } from "@/hooks/useAddToCartModal";
 import { apiClient } from "@/lib/api-client";
@@ -18,6 +19,8 @@ export default function ProductPage() {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [selectedVariant, setSelectedVariant] = useState<string>("");
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [zoomOpen, setZoomOpen] = useState(false);
 
   const { isModalOpen, addedProductName, closeModal, addToCartWithModal } = useAddToCartModal();
 
@@ -43,11 +46,16 @@ export default function ProductPage() {
     };
     fetchProduct();
     setQuantity(1);
+    setSelectedImageIndex(0);
   }, [slug]);
 
   const handleAddToCart = () => {
     if (!product) return;
     addToCartWithModal(product, quantity, selectedVariant || undefined);
+  };
+
+  const handleImageClick = () => {
+    setZoomOpen(true);
   };
 
   if (loading) {
@@ -73,6 +81,8 @@ export default function ProductPage() {
     );
   }
 
+  const currentImage = product.images[selectedImageIndex] || product.images[0];
+
   return (
     <Layout>
       <div className="container-bwk py-8">
@@ -85,28 +95,70 @@ export default function ProductPage() {
           <span className="text-foreground">{product.name}</span>
         </nav>
 
+        {/* 
+          Desktop: 2 columns - left (gallery + description), right (purchase controls)
+          Mobile: stacked - images → title/price → variants → qty/buy → description
+        */}
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
-          {/* Images */}
-          <div className="space-y-4">
-            <div className="aspect-square bg-muted rounded-xl overflow-hidden">
-              <img
-                src={product.images[0]}
-                alt={product.name}
-                className="w-full h-full object-cover"
-              />
-            </div>
-            {product.images.length > 1 && (
-              <div className="grid grid-cols-4 gap-2">
-                {product.images.slice(0, 4).map((img, i) => (
-                  <div key={i} className="aspect-square bg-muted rounded-lg overflow-hidden border-2 border-transparent hover:border-primary cursor-pointer">
-                    <img src={img} alt="" className="w-full h-full object-cover" />
+          {/* Left Column - Images + Description (desktop) */}
+          <div className="space-y-6">
+            {/* Gallery */}
+            <div className="space-y-4">
+              <div
+                className="aspect-square bg-muted rounded-xl overflow-hidden relative group cursor-zoom-in"
+                onClick={handleImageClick}
+                role="button"
+                tabIndex={0}
+                aria-label="Clique para ampliar a imagem"
+                onKeyDown={(e) => e.key === 'Enter' && handleImageClick()}
+              >
+                <img
+                  src={currentImage}
+                  alt={product.name}
+                  className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                />
+                {/* Zoom indicator on hover */}
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-background/90 rounded-full p-3">
+                    <ZoomIn className="h-6 w-6 text-foreground" />
                   </div>
-                ))}
+                </div>
               </div>
-            )}
+              {product.images.length > 1 && (
+                <div className="grid grid-cols-4 gap-2">
+                  {product.images.slice(0, 4).map((img, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      className={`aspect-square bg-muted rounded-lg overflow-hidden border-2 transition-colors ${selectedImageIndex === i
+                        ? 'border-primary'
+                        : 'border-transparent hover:border-primary/50'
+                        }`}
+                      onClick={() => setSelectedImageIndex(i)}
+                      aria-label={`Ver imagem ${i + 1}`}
+                      aria-pressed={selectedImageIndex === i}
+                    >
+                      <img src={img} alt="" className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Description - Desktop only (below image) */}
+            <div className="hidden lg:block">
+              {product.descriptionHtml ? (
+                <div
+                  className="prose prose-sm max-w-none text-muted-foreground [&_a]:text-primary [&_a]:underline"
+                  dangerouslySetInnerHTML={{ __html: product.descriptionHtml }}
+                />
+              ) : product.description ? (
+                <p className="text-muted-foreground">{product.description}</p>
+              ) : null}
+            </div>
           </div>
 
-          {/* Details */}
+          {/* Right Column - Purchase Controls */}
           <div>
             <h1 className="text-2xl md:text-3xl font-bold mb-4">{product.name}</h1>
 
@@ -118,8 +170,6 @@ export default function ProductPage() {
                 </span>
               )}
             </div>
-
-            <p className="text-muted-foreground mb-6">{product.description}</p>
 
             {/* Variants */}
             {product.variants && product.variants.length > 0 && (
@@ -148,14 +198,16 @@ export default function ProductPage() {
                   variant="outline"
                   size="icon"
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  aria-label="Diminuir quantidade"
                 >
                   <Minus className="h-4 w-4" />
                 </Button>
-                <span className="w-12 text-center font-medium">{quantity}</span>
+                <span className="w-12 text-center font-medium" aria-live="polite">{quantity}</span>
                 <Button
                   variant="outline"
                   size="icon"
                   onClick={() => setQuantity(quantity + 1)}
+                  aria-label="Aumentar quantidade"
                 >
                   <Plus className="h-4 w-4" />
                 </Button>
@@ -174,7 +226,7 @@ export default function ProductPage() {
             </Button>
 
             {/* Shipping Info */}
-            <div className="p-4 bg-muted rounded-lg flex items-start gap-3">
+            <div className="p-4 bg-muted rounded-lg flex items-start gap-3 mb-6">
               <Truck className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
               <div>
                 <p className="font-medium text-sm">Entrega para todo o Brasil</p>
@@ -182,9 +234,21 @@ export default function ProductPage() {
               </div>
             </div>
 
+            {/* Description - Mobile only (after CTA, before specs) */}
+            <div className="lg:hidden mb-6">
+              {product.descriptionHtml ? (
+                <div
+                  className="prose prose-sm max-w-none text-muted-foreground [&_a]:text-primary [&_a]:underline"
+                  dangerouslySetInnerHTML={{ __html: product.descriptionHtml }}
+                />
+              ) : product.description ? (
+                <p className="text-muted-foreground">{product.description}</p>
+              ) : null}
+            </div>
+
             {/* Specs */}
             {product.specs.length > 0 && (
-              <div className="mt-8">
+              <div className="mt-2">
                 <h3 className="font-semibold mb-4">Especificações</h3>
                 <dl className="space-y-2">
                   {product.specs.map((spec, i) => (
@@ -211,6 +275,14 @@ export default function ProductPage() {
           </section>
         )}
       </div>
+
+      {/* Zoom Modal */}
+      <ImageZoomModal
+        open={zoomOpen}
+        onOpenChange={setZoomOpen}
+        imageUrl={currentImage}
+        imageAlt={product.name}
+      />
 
       {/* Modal de produto adicionado */}
       <AddedToCartModal

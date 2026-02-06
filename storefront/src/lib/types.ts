@@ -5,6 +5,8 @@ export interface Product {
   slug: string;
   name: string;
   description: string;
+  /** Descrição HTML vinda da Shopify (para renderização rica) */
+  descriptionHtml?: string;
   price: number;
   originalPrice?: number;
   category: CategorySlug;

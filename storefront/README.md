@@ -71,3 +71,33 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+
+---
+
+## Technical Features
+
+### Product Image Zoom
+
+The product detail page (PDP) includes an image zoom feature:
+
+- **Desktop**: Click on the main image to open a modal with zoom. Use mouse wheel to zoom in/out, drag to pan.
+- **Mobile**: Tap on the main image to open. Use pinch gestures to zoom, drag to pan.
+- **Accessibility**: Modal includes focus trap, closes with ESC key or X button.
+
+Implementation uses `react-zoom-pan-pinch` with shadcn/ui Dialog.
+
+### Product Description (HTML Rendering)
+
+Product descriptions are rendered exactly as configured in Shopify Admin:
+
+- Rich HTML support: paragraphs, lists, bold, links, etc.
+- Rendered using `dangerouslySetInnerHTML` (safe since Shopify is the trusted source)
+- Styled with Tailwind Typography plugin (`.prose` classes)
+
+### Cache Strategy
+
+This is a Single Page Application (SPA) with no server-side caching:
+
+- **No ISR/SSG**: All Shopify API calls happen client-side on each page visit
+- **No aggressive caching**: Changes in Shopify Admin reflect immediately after page refresh
+- **High-res images for zoom**: Only loaded on-demand when zoom modal opens (via Shopify CDN `?width=2048` parameter)
