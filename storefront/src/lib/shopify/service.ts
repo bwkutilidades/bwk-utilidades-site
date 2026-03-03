@@ -16,7 +16,12 @@ import type {
     ShopifyProduct,
     ShopifyVariant,
 } from './types';
-import { getCategoryFallbackImage, CATEGORY_MAP, type CategoryHandle } from './categories';
+import { CATEGORY_MAP, type CategoryHandle } from './categories';
+import {
+    resolveCategoryImageWithSource,
+    slugifyCategoryKey,
+    type CategoryImageSource,
+} from '@/lib/category-images';
 import type { Product, ProductVariant, CategorySlug } from '@/lib/types';
 
 // ========================================
@@ -111,6 +116,59 @@ function transformProduct(shopifyProduct: ShopifyProduct): Product {
     };
 }
 
+const CATEGORY_ALIASES: Record<CategoryHandle, string[]> = {
+    'limpeza-e-higiene': ['limpeza-e-higiene', 'limpeza-higiene'],
+    'organizacao-e-utilidades': ['organizacao-e-utilidades', 'organizacao-utilidades'],
+    'cozinha-e-bar': ['cozinha-e-bar', 'cozinha-bar'],
+};
+
+function normalizeCategoryCandidates(handle: string, title: string): string[] {
+    const normalizedHandle = slugifyCategoryKey(handle);
+    const normalizedTitle = slugifyCategoryKey(title);
+
+    return [normalizedHandle, normalizedTitle].filter(Boolean);
+}
+
+function matchPrimaryCategory(handle: string, title: string): CategoryHandle | null {
+    const candidates = new Set(normalizeCategoryCandidates(handle, title));
+
+    for (const category of CATEGORY_MAP) {
+        if (
+            candidates.has(slugifyCategoryKey(category.label))
+            || CATEGORY_ALIASES[category.handle].some((alias) => candidates.has(alias))
+        ) {
+            return category.handle;
+        }
+    }
+
+    return null;
+}
+
+function shouldLogCategoryDebug(): boolean {
+    return import.meta.env.DEV
+        && typeof window !== 'undefined'
+        && window.location.pathname === '/solucoes';
+}
+
+function logCategoryCollectionDebug(
+    receivedHandles: string[],
+    collections: CategoryCollectionData[],
+): void {
+    if (!shouldLogCategoryDebug()) {
+        return;
+    }
+
+    console.info('[Solucoes] Collections handles recebidos:', receivedHandles);
+    console.table(
+        collections.map((collection) => ({
+            handle: collection.handle,
+            title: collection.title,
+            imageSource: collection.imageSource,
+            imageUrl: collection.imageUrl,
+        })),
+    );
+}
+
 // ========================================
 // Service Functions
 // ========================================
@@ -134,7 +192,7 @@ export interface ListProductsResult {
  * @returns List of transformed products with pagination info
  */
 export async function listProducts(options: ListProductsOptions = {}): Promise<ListProductsResult> {
-    const { limit = 12, after, search } = options;
+    const { limit = 24, after, search } = options;
 
     if (!isShopifyConfigured()) {
         console.warn('[Shopify Service] Shopify not configured, returning empty results');
@@ -149,6 +207,7 @@ export async function listProducts(options: ListProductsOptions = {}): Promise<L
             response = await shopifyFetch<ProductsQueryResponse>(SEARCH_PRODUCTS_QUERY, {
                 query: search,
                 first: limit,
+                after: after || null,
             });
         } else {
             // Regular listing
@@ -251,7 +310,8 @@ export async function getRelatedProducts(
  */
 export async function getProductsByCollectionHandle(
     handle: string,
-    limit = 24
+    limit = 24,
+    after?: string,
 ): Promise<ListProductsResult> {
     if (!isShopifyConfigured()) {
         console.warn('[Shopify Service] Shopify not configured, returning empty results');
@@ -262,6 +322,7 @@ export async function getProductsByCollectionHandle(
         const response = await shopifyFetch<CollectionByHandleQueryResponse>(COLLECTION_BY_HANDLE_QUERY, {
             handle,
             first: limit,
+            after: after || null,
         });
 
         if (!response.collection) {
@@ -287,11 +348,12 @@ export async function getProductsByCollectionHandle(
 // ========================================
 
 export interface CategoryCollectionData {
-    handle: CategoryHandle;
+    handle: string;
     title: string;
     description: string;
     imageUrl: string;
     imageAlt: string;
+    imageSource: CategoryImageSource;
 }
 
 /**
@@ -303,50 +365,152 @@ export interface CategoryCollectionData {
 export async function getCategoryCollections(): Promise<CategoryCollectionData[]> {
     if (!isShopifyConfigured()) {
         console.warn('[Shopify Service] Shopify not configured, using fallback images');
-        return CATEGORY_MAP.map(cat => ({
-            handle: cat.handle,
-            title: cat.label,
-            description: '',
-            imageUrl: getCategoryFallbackImage(cat.handle),
-            imageAlt: cat.label,
-        }));
-    }
-
-    try {
-        const response = await shopifyFetch<CollectionsMetadataQueryResponse>(COLLECTIONS_METADATA_QUERY, {});
-
-        // Map aliases to handles
-        const aliasToHandle: Record<string, CategoryHandle> = {
-            limpezaEHigiene: 'limpeza-e-higiene',
-            organizacaoEUtilidades: 'organizacao-e-utilidades',
-            cozinhaEBar: 'cozinha-e-bar',
-        };
-
-        return CATEGORY_MAP.map(cat => {
-            // Find the matching collection data from response
-            const alias = Object.keys(aliasToHandle).find(key => aliasToHandle[key] === cat.handle);
-            const collectionData = alias ? response[alias as keyof CollectionsMetadataQueryResponse] : null;
-
-            // Use Shopify image if available, otherwise fallback
-            const hasShopifyImage = collectionData?.image?.url;
+        const fallbackCollections = CATEGORY_MAP.map((cat) => {
+            const resolvedImage = resolveCategoryImageWithSource(null, cat.handle, cat.label);
 
             return {
                 handle: cat.handle,
-                title: collectionData?.title || cat.label,
-                description: collectionData?.description || '',
-                imageUrl: hasShopifyImage ? collectionData.image!.url : getCategoryFallbackImage(cat.handle),
-                imageAlt: collectionData?.image?.altText || cat.label,
+                title: cat.label,
+                description: '',
+                imageUrl: resolvedImage.url,
+                imageAlt: cat.label,
+                imageSource: resolvedImage.source,
             };
         });
+
+        logCategoryCollectionDebug(
+            fallbackCollections.map((collection) => collection.handle),
+            fallbackCollections,
+        );
+
+        return fallbackCollections;
+    }
+
+    try {
+        const response = await shopifyFetch<CollectionsMetadataQueryResponse>(COLLECTIONS_METADATA_QUERY, {
+            first: 100,
+        });
+
+        const receivedCollections = response.collections.edges.map((edge) => edge.node);
+        const matchedCollections = new Map<CategoryHandle, CollectionMetadata>();
+
+        for (const collection of receivedCollections) {
+            const categoryHandle = matchPrimaryCategory(collection.handle, collection.title);
+
+            if (categoryHandle && !matchedCollections.has(categoryHandle)) {
+                matchedCollections.set(categoryHandle, collection);
+            }
+        }
+
+        const normalizedCollections = CATEGORY_MAP.map((cat) => {
+            const collectionData = matchedCollections.get(cat.handle);
+            const resolvedHandle = collectionData?.handle || cat.handle;
+            const resolvedTitle = collectionData?.title || cat.label;
+            const resolvedImage = resolveCategoryImageWithSource(
+                collectionData?.image?.url || null,
+                resolvedHandle,
+                resolvedTitle,
+            );
+
+            return {
+                handle: resolvedHandle,
+                title: resolvedTitle,
+                description: collectionData?.description || '',
+                imageUrl: resolvedImage.url,
+                imageAlt: collectionData?.image?.altText || resolvedTitle,
+                imageSource: resolvedImage.source,
+            };
+        });
+
+        logCategoryCollectionDebug(
+            receivedCollections.map((collection) => collection.handle),
+            normalizedCollections,
+        );
+
+        return normalizedCollections;
     } catch (error) {
         console.error('[Shopify Service] Error fetching category collections:', error);
-        // Return fallback on error
-        return CATEGORY_MAP.map(cat => ({
-            handle: cat.handle,
-            title: cat.label,
-            description: '',
-            imageUrl: getCategoryFallbackImage(cat.handle),
-            imageAlt: cat.label,
-        }));
+        const fallbackCollections = CATEGORY_MAP.map((cat) => {
+            const resolvedImage = resolveCategoryImageWithSource(null, cat.handle, cat.label);
+
+            return {
+                handle: cat.handle,
+                title: cat.label,
+                description: '',
+                imageUrl: resolvedImage.url,
+                imageAlt: cat.label,
+                imageSource: resolvedImage.source,
+            };
+        });
+
+        logCategoryCollectionDebug(
+            fallbackCollections.map((collection) => collection.handle),
+            fallbackCollections,
+        );
+
+        return fallbackCollections;
+    }
+}
+
+export async function validateCatalogCoverage(): Promise<void> {
+    if (!import.meta.env.DEV || !isShopifyConfigured()) {
+        return;
+    }
+
+    try {
+        const categoryCollections = await getCategoryCollections();
+        const collectionHandles = Array.from(
+            new Set(categoryCollections.map((collection) => collection.handle)),
+        );
+
+        const collectionIds = new Set<string>();
+
+        for (const handle of collectionHandles) {
+            let after: string | undefined;
+            let hasNextPage = true;
+
+            while (hasNextPage) {
+                const result = await getProductsByCollectionHandle(handle, 100, after);
+
+                for (const product of result.products) {
+                    collectionIds.add(product.id);
+                }
+
+                hasNextPage = result.hasNextPage;
+                after = result.endCursor || undefined;
+            }
+        }
+
+        const catalogIds = new Set<string>();
+        let after: string | undefined;
+        let hasNextPage = true;
+
+        while (hasNextPage) {
+            const result = await listProducts({ limit: 100, after });
+
+            for (const product of result.products) {
+                catalogIds.add(product.id);
+            }
+
+            hasNextPage = result.hasNextPage;
+            after = result.endCursor || undefined;
+        }
+
+        const missingInCatalog = Array.from(collectionIds).filter((id) => !catalogIds.has(id));
+        const payload = {
+            collectionHandles,
+            collectionCount: collectionIds.size,
+            catalogCount: catalogIds.size,
+            missingInCatalog,
+        };
+
+        if (missingInCatalog.length > 0) {
+            console.warn('[Catalogo][DEV] missingInCatalog detectado', payload);
+            return;
+        }
+
+        console.info('[Catalogo][DEV] Cobertura validada', payload);
+    } catch (error) {
+        console.error('[Catalogo][DEV] Falha ao validar cobertura do catálogo:', error);
     }
 }

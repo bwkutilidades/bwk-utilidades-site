@@ -137,10 +137,16 @@ export interface CollectionMetadata {
     } | null;
 }
 
+export interface CollectionMetadataEdge {
+    node: CollectionMetadata;
+}
+
+export interface CollectionMetadataConnection {
+    edges: CollectionMetadataEdge[];
+}
+
 export interface CollectionsMetadataQueryResponse {
-    limpezaEHigiene: CollectionMetadata | null;
-    organizacaoEUtilidades: CollectionMetadata | null;
-    cozinhaEBar: CollectionMetadata | null;
+    collections: CollectionMetadataConnection;
 }
 
 // ========================================
@@ -249,4 +255,3 @@ export interface CheckoutCreateResponse {
         }>;
     };
 }
-

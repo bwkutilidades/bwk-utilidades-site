@@ -93,6 +93,8 @@ export interface ListProductsParams {
   sort?: "relevance" | "price-asc" | "price-desc" | "name";
   page?: number;
   limit?: number;
+  /** Shopify cursor for cursor-based pagination */
+  after?: string;
 }
 
 export interface PaginatedResponse<T> {
@@ -100,6 +102,10 @@ export interface PaginatedResponse<T> {
   total: number;
   page: number;
   totalPages: number;
+  /** Whether there are more items to fetch (Shopify cursor pagination) */
+  hasNextPage?: boolean;
+  /** Cursor to use for fetching the next page */
+  endCursor?: string | null;
 }
 
 export interface B2BLead {

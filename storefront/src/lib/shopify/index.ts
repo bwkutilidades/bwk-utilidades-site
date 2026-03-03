@@ -11,6 +11,7 @@ export {
     getRelatedProducts,
     getProductsByCollectionHandle,
     getCategoryCollections,
+    validateCatalogCoverage,
     type ListProductsOptions,
     type ListProductsResult,
     type CategoryCollectionData,
@@ -31,4 +32,3 @@ export {
     type CartLineInput,
 } from './cart';
 export type * from './types';
-

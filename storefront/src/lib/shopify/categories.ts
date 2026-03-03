@@ -5,6 +5,8 @@
  * These handles must match the collections created in Shopify Admin.
  */
 
+import { slugifyCategoryKey } from "@/lib/category-images";
+
 export const CATEGORY_MAP = [
     { label: "Limpeza e Higiene", handle: "limpeza-e-higiene" },
     { label: "Organização e Utilidades", handle: "organizacao-e-utilidades" },
@@ -13,21 +15,32 @@ export const CATEGORY_MAP = [
 
 export type CategoryHandle = typeof CATEGORY_MAP[number]["handle"];
 
+const CATEGORY_HANDLE_ALIASES: Record<CategoryHandle, string[]> = {
+    "limpeza-e-higiene": ["limpeza-e-higiene", "limpeza-higiene"],
+    "organizacao-e-utilidades": ["organizacao-e-utilidades", "organizacao-utilidades"],
+    "cozinha-e-bar": ["cozinha-e-bar", "cozinha-bar"],
+};
+
 /**
  * Fallback images for categories when Shopify collection doesn't have an image
- * These are stored in /public/categories/
+ * These are stored in /public/images/categories/
  */
 export const CATEGORY_IMAGE_FALLBACK: Record<CategoryHandle, string> = {
-    "limpeza-e-higiene": "/categories/limpeza-e-higiene.jpg",
-    "organizacao-e-utilidades": "/categories/organizacao-e-utilidades.png",
-    "cozinha-e-bar": "/categories/cozinha-e-bar.png",
+    "limpeza-e-higiene": "/images/categories/limpeza-higiene.jpg",
+    "organizacao-e-utilidades": "/images/categories/utilidades.png",
+    "cozinha-e-bar": "/images/categories/cozinha-e-bar.png",
 };
 
 /**
  * Get category label by handle
  */
 export function getCategoryLabel(handle: string): string | undefined {
-    return CATEGORY_MAP.find((c) => c.handle === handle)?.label;
+    const normalizedHandle = slugifyCategoryKey(handle);
+
+    return CATEGORY_MAP.find((category) => (
+        CATEGORY_HANDLE_ALIASES[category.handle].includes(normalizedHandle)
+        || slugifyCategoryKey(category.label) === normalizedHandle
+    ))?.label;
 }
 
 /**

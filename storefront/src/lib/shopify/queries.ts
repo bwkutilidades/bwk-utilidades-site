@@ -84,14 +84,16 @@ const CART_FRAGMENT = `
 `;
 
 /**
- * Query to list products with pagination
+ * Query to list products with pagination and stable sort
  * 
- * @param first - Number of products to fetch (default: 12)
+ * Uses sortKey: CREATED_AT for deterministic cursor pagination.
+ * 
+ * @param first - Number of products to fetch (default: 24)
  * @param after - Cursor for pagination (optional)
  */
 export const PRODUCTS_QUERY = `
   query listProducts($first: Int!, $after: String) {
-    products(first: $first, after: $after) {
+    products(first: $first, after: $after, sortKey: CREATED_AT, reverse: true) {
       edges {
         node {
           ${PRODUCT_FRAGMENT}
@@ -121,8 +123,8 @@ export const PRODUCTS_QUERY = `
       }
       pageInfo {
         hasNextPage
-        hasPreviousPage
         endCursor
+        hasPreviousPage
         startCursor
       }
     }
@@ -174,10 +176,11 @@ export const PRODUCT_BY_HANDLE_QUERY = `
  * 
  * @param query - Search query string
  * @param first - Number of products to fetch
+ * @param after - Cursor for pagination (optional)
  */
 export const SEARCH_PRODUCTS_QUERY = `
-  query searchProducts($query: String!, $first: Int!) {
-    products(first: $first, query: $query) {
+  query searchProducts($query: String!, $first: Int!, $after: String) {
+    products(first: $first, after: $after, query: $query, sortKey: CREATED_AT, reverse: true) {
       edges {
         node {
           ${PRODUCT_FRAGMENT}
@@ -207,7 +210,9 @@ export const SEARCH_PRODUCTS_QUERY = `
       }
       pageInfo {
         hasNextPage
+        hasPreviousPage
         endCursor
+        startCursor
       }
     }
   }
@@ -301,15 +306,16 @@ export const CART_QUERY = `
  * 
  * @param handle - Collection handle/slug
  * @param first - Number of products to fetch
+ * @param after - Cursor for pagination (optional)
  */
 export const COLLECTION_BY_HANDLE_QUERY = `
-  query collectionByHandle($handle: String!, $first: Int!) {
+  query collectionByHandle($handle: String!, $first: Int!, $after: String) {
     collection(handle: $handle) {
       id
       title
       handle
       description
-      products(first: $first) {
+      products(first: $first, after: $after, sortKey: CREATED_AT, reverse: true) {
         edges {
           node {
             ${PRODUCT_FRAGMENT}
@@ -339,7 +345,9 @@ export const COLLECTION_BY_HANDLE_QUERY = `
         }
         pageInfo {
           hasNextPage
+          hasPreviousPage
           endCursor
+          startCursor
         }
       }
     }
@@ -347,47 +355,25 @@ export const COLLECTION_BY_HANDLE_QUERY = `
 `;
 
 /**
- * Query to get metadata for multiple collections by handle
+ * Query to get metadata for collections
  * Used for the "Nossas Categorias" section on the Home page
- * 
- * Note: We use aliases to fetch all 3 collections in a single request
  */
 export const COLLECTIONS_METADATA_QUERY = `
-  query collectionsMetadata {
-    limpezaEHigiene: collection(handle: "limpeza-e-higiene") {
-      id
-      title
-      handle
-      description
-      image {
-        url
-        altText
-        width
-        height
-      }
-    }
-    organizacaoEUtilidades: collection(handle: "organizacao-e-utilidades") {
-      id
-      title
-      handle
-      description
-      image {
-        url
-        altText
-        width
-        height
-      }
-    }
-    cozinhaEBar: collection(handle: "cozinha-e-bar") {
-      id
-      title
-      handle
-      description
-      image {
-        url
-        altText
-        width
-        height
+  query collectionsMetadata($first: Int!) {
+    collections(first: $first, sortKey: TITLE) {
+      edges {
+        node {
+          id
+          title
+          handle
+          description
+          image {
+            url
+            altText
+            width
+            height
+          }
+        }
       }
     }
   }

@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Search, X, Loader2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,17 +7,47 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Layout } from "@/components/layout/Layout";
 import { ProductCard } from "@/components/products/ProductCard";
 import { apiClient } from "@/lib/api-client";
-import { getProductsByCollectionHandle, getCategoryLabel, CATEGORY_MAP } from "@/lib/shopify";
+import { getProductsByCollectionHandle, getCategoryLabel, validateCatalogCoverage } from "@/lib/shopify";
 import { categories } from "@/data/categories";
 import { siteConfig } from "@/config/site";
 import type { Product, CategorySlug, ListProductsParams } from "@/lib/types";
+
+const PRODUCTS_PER_PAGE = 24;
+
+function mergeUniqueProducts(current: Product[], incoming: Product[]): Product[] {
+  const productsById = new Map<string, Product>();
+
+  for (const product of current) {
+    productsById.set(product.id, product);
+  }
+
+  for (const product of incoming) {
+    productsById.set(product.id, product);
+  }
+
+  return Array.from(productsById.values());
+}
+
+function sortProducts(products: Product[], sort: ListProductsParams["sort"]): Product[] {
+  switch (sort) {
+    case "price-asc":
+      return [...products].sort((a, b) => a.price - b.price);
+    case "price-desc":
+      return [...products].sort((a, b) => b.price - a.price);
+    case "name":
+      return [...products].sort((a, b) => a.name.localeCompare(b.name));
+    default:
+      return products;
+  }
+}
 
 export default function CatalogoPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasNextPage, setHasNextPage] = useState(false);
+  const [endCursor, setEndCursor] = useState<string | null>(null);
 
   // Read collection from URL (for category filtering via Shopify Collections)
   const collectionHandle = searchParams.get("collection") || "";
@@ -26,70 +56,115 @@ export default function CatalogoPage() {
   const [search, setSearch] = useState(searchParams.get("busca") || "");
   const [category, setCategory] = useState<string>(searchParams.get("categoria") || "");
   const [sort, setSort] = useState<string>(searchParams.get("ordem") || "relevance");
+  const coverageValidationRanRef = useRef(false);
 
-  const fetchProducts = async () => {
-    setLoading(true);
+  /**
+   * Fetch products — either from a specific collection or from all products.
+   * When `append` is true, new results are appended (for "load more").
+   */
+  const fetchProducts = useCallback(async (opts: { append?: boolean; cursor?: string | null } = {}) => {
+    const { append = false, cursor = null } = opts;
+
+    if (append) {
+      setLoadingMore(true);
+    } else {
+      setLoading(true);
+    }
+
     try {
       // If filtering by Shopify collection
       if (collectionHandle) {
-        const result = await getProductsByCollectionHandle(collectionHandle);
-        let filteredProducts = result.products;
+        const result = await getProductsByCollectionHandle(
+          collectionHandle,
+          PRODUCTS_PER_PAGE,
+          cursor || undefined,
+        );
 
-        // Apply client-side sorting
-        switch (sort) {
-          case "price-asc":
-            filteredProducts = [...filteredProducts].sort((a, b) => a.price - b.price);
-            break;
-          case "price-desc":
-            filteredProducts = [...filteredProducts].sort((a, b) => b.price - a.price);
-            break;
-          case "name":
-            filteredProducts = [...filteredProducts].sort((a, b) => a.name.localeCompare(b.name));
-            break;
-        }
+        const applyCollectionFilters = (items: Product[]) => {
+          if (!search) {
+            return sortProducts(items, sort as ListProductsParams["sort"]);
+          }
 
-        // Apply client-side search filter
-        if (search) {
           const searchLower = search.toLowerCase();
-          filteredProducts = filteredProducts.filter(
+          const filteredItems = items.filter(
             (p) =>
               p.name.toLowerCase().includes(searchLower) ||
               p.description.toLowerCase().includes(searchLower)
           );
+
+          return sortProducts(filteredItems, sort as ListProductsParams["sort"]);
+        };
+
+        if (append) {
+          setProducts((prev) => applyCollectionFilters(mergeUniqueProducts(prev, result.products)));
+        } else {
+          setProducts(applyCollectionFilters(result.products));
         }
 
-        setProducts(filteredProducts);
-        setTotal(filteredProducts.length);
+        setHasNextPage(result.hasNextPage);
+        setEndCursor(result.endCursor);
       } else {
-        // Regular listing via apiClient
+        // All products via cursor-based pagination
         const params: ListProductsParams = {
-          page,
-          limit: 12,
+          limit: PRODUCTS_PER_PAGE,
           search: search || undefined,
           category: category as CategorySlug || undefined,
           sort: sort as ListProductsParams["sort"],
+          after: cursor || undefined,
         };
 
         const result = await apiClient.listProducts(params);
-        setProducts(result.data);
-        setTotal(result.total);
+
+        if (append) {
+          setProducts((prev) =>
+            sortProducts(
+              mergeUniqueProducts(prev, result.data),
+              sort as ListProductsParams["sort"],
+            ),
+          );
+        } else {
+          setProducts(sortProducts(result.data, sort as ListProductsParams["sort"]));
+        }
+        setHasNextPage(result.hasNextPage ?? false);
+        setEndCursor(result.endCursor ?? null);
       }
     } catch (error) {
       console.error("Failed to fetch products:", error);
-      setProducts([]);
-      setTotal(0);
+      if (!append) {
+        setProducts([]);
+      }
+      setHasNextPage(false);
+      setEndCursor(null);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
+    }
+  }, [collectionHandle, search, category, sort]);
+
+  // Initial load & re-fetch when filters change
+  useEffect(() => {
+    setEndCursor(null);
+    setHasNextPage(false);
+    fetchProducts({ append: false, cursor: null });
+  }, [fetchProducts]);
+
+  useEffect(() => {
+    if (!import.meta.env.DEV || collectionHandle || coverageValidationRanRef.current) {
+      return;
+    }
+
+    coverageValidationRanRef.current = true;
+    void validateCatalogCoverage();
+  }, [collectionHandle]);
+
+  const handleLoadMore = () => {
+    if (endCursor && hasNextPage) {
+      fetchProducts({ append: true, cursor: endCursor });
     }
   };
 
-  useEffect(() => {
-    fetchProducts();
-  }, [page, search, category, sort, collectionHandle]);
-
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    setPage(1);
     const params = new URLSearchParams();
     if (collectionHandle) params.set("collection", collectionHandle);
     if (search) params.set("busca", search);
@@ -102,7 +177,6 @@ export default function CatalogoPage() {
     setSearch("");
     setCategory("");
     setSort("relevance");
-    setPage(1);
     // Keep collection if it exists
     if (collectionHandle) {
       setSearchParams({ collection: collectionHandle });
@@ -115,7 +189,6 @@ export default function CatalogoPage() {
     setSearch("");
     setCategory("");
     setSort("relevance");
-    setPage(1);
     setSearchParams({});
   };
 
@@ -140,7 +213,8 @@ export default function CatalogoPage() {
               <h1 className="text-3xl md:text-4xl font-bold mb-2">Catálogo</h1>
             )}
             <p className="text-muted-foreground">
-              {total} produto{total !== 1 ? "s" : ""} encontrado{total !== 1 ? "s" : ""}
+              {products.length} produto{products.length !== 1 ? "s" : ""} encontrado{products.length !== 1 ? "s" : ""}
+              {hasNextPage ? " (mais disponíveis)" : ""}
             </p>
           </div>
 
@@ -176,7 +250,7 @@ export default function CatalogoPage() {
               <div className="flex flex-wrap gap-4">
                 {/* Only show category filter when not in collection mode */}
                 {!collectionHandle && (
-                  <Select value={category || "all"} onValueChange={(v) => { setCategory(v === "all" ? "" : v); setPage(1); }}>
+                  <Select value={category || "all"} onValueChange={(v) => { setCategory(v === "all" ? "" : v); }}>
                     <SelectTrigger className="w-[180px]">
                       <SelectValue placeholder="Categoria" />
                     </SelectTrigger>
@@ -189,7 +263,7 @@ export default function CatalogoPage() {
                   </Select>
                 )}
 
-                <Select value={sort} onValueChange={(v) => { setSort(v); setPage(1); }}>
+                <Select value={sort} onValueChange={(v) => { setSort(v); }}>
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Ordenar por" />
                   </SelectTrigger>
@@ -250,16 +324,16 @@ export default function CatalogoPage() {
             </div>
           )}
 
-          {/* Load More - only show for non-collection mode */}
-          {!collectionHandle && products.length < total && (
+          {/* Load More */}
+          {hasNextPage && !loading && (
             <div className="text-center mt-12">
               <Button
                 variant="outline"
                 size="lg"
-                onClick={() => setPage((p) => p + 1)}
-                disabled={loading}
+                onClick={handleLoadMore}
+                disabled={loadingMore}
               >
-                {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                {loadingMore ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                 Carregar Mais
               </Button>
             </div>

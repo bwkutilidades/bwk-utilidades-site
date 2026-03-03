@@ -14,15 +14,15 @@ import type {
 } from "@/lib/types";
 
 export const apiClient = {
-  // Products - using Shopify Storefront API
+  // Products - using Shopify Storefront API (cursor-based pagination)
   async listProducts(params: ListProductsParams = {}): Promise<PaginatedResponse<Product>> {
     try {
-      const page = params.page || 1;
-      const limit = params.limit || 12;
+      const limit = params.limit || 24;
 
       const result = await shopifyListProducts({
         limit,
         search: params.search,
+        after: params.after,
       });
 
       let products = result.products;
@@ -57,17 +57,20 @@ export const apiClient = {
       return {
         data: products,
         total: products.length,
-        page,
-        totalPages: result.hasNextPage ? page + 1 : page,
+        page: 1,
+        totalPages: result.hasNextPage ? 2 : 1,
+        hasNextPage: result.hasNextPage,
+        endCursor: result.endCursor,
       };
     } catch (error) {
       console.error("[apiClient.listProducts] Error:", error);
-      // Return empty result on error
       return {
         data: [],
         total: 0,
-        page: params.page || 1,
+        page: 1,
         totalPages: 0,
+        hasNextPage: false,
+        endCursor: null,
       };
     }
   },

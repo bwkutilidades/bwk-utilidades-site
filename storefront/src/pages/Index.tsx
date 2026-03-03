@@ -4,6 +4,7 @@ import { ArrowRight, Building2, ShoppingBag, FileText, Package, Truck, CheckCirc
 import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/layout/Layout";
 import { ProductCard } from "@/components/products/ProductCard";
+import { CategoryCard } from "@/components/categories/CategoryCard";
 import { siteConfig } from "@/config/site";
 import { useShopifyFeaturedProducts } from "@/hooks/useShopifyProducts";
 import { useCategoryCollections } from "@/hooks/useCategoryCollections";
@@ -225,31 +226,14 @@ export default function HomePage() {
               ))
             ) : (
               categoryCollections.map((collection) => (
-                <Link
+                <CategoryCard
                   key={collection.handle}
-                  to={`/catalogo?collection=${collection.handle}`}
-                  className="group relative overflow-hidden rounded-xl bg-card border border-border aspect-[4/3] flex items-end hover:border-primary hover:shadow-lg transition-all duration-300"
-                >
-                  {/* Category Image */}
-                  <img
-                    src={collection.imageUrl}
-                    alt={collection.imageAlt}
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  {/* Gradient overlay for text readability */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-                  {/* Top accent bar */}
-                  <div className="absolute inset-x-0 top-0 h-1 bg-primary z-10" aria-hidden="true" />
-                  {/* Text content */}
-                  <div className="relative z-20 p-6">
-                    <h3 className="text-xl font-semibold text-white group-hover:text-primary transition-colors">
-                      {collection.title}
-                    </h3>
-                    {collection.description && (
-                      <p className="text-sm text-white/80 mt-1 line-clamp-2">{collection.description}</p>
-                    )}
-                  </div>
-                </Link>
+                  handle={collection.handle}
+                  title={collection.title}
+                  description={collection.description}
+                  imageUrl={collection.imageUrl}
+                  imageAlt={collection.imageAlt}
+                />
               ))
             )}
           </div>
