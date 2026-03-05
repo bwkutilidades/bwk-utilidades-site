@@ -8,15 +8,15 @@ export const siteConfig = {
   ctaQuoteText: "Solicitar cotação",
   
   contact: {
-    whatsapp: "https://api.whatsapp.com/send/?phone=5511949848756",
+    whatsapp: "https://wa.me/5511949848756",
     phone: "(11) 94984-8756",
-    email: "contato@bwkutilidades.com.br",
+    email: "bwkutilidades@gmail.com",
     address: {
-      street: "Rua Exemplo, 123",
-      neighborhood: "Centro",
-      city: "São Paulo",
+      street: "Rua Bresser, 33",
+      neighborhood: "Parque Erásmo Assunção",
+      city: "Santo André",
       state: "SP",
-      zip: "01000-000",
+      zip: "09271-220",
     },
     businessHours: "Segunda a Sexta: 8h às 18h | Sábado: 8h às 12h",
   },

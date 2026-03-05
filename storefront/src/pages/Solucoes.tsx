@@ -5,6 +5,7 @@ import { Layout } from "@/components/layout/Layout";
 import { CategoryCard } from "@/components/categories/CategoryCard";
 import { useCategoryCollections } from "@/hooks/useCategoryCollections";
 import { siteConfig } from "@/config/site";
+import { buildContactMessage, buildWhatsappUrl } from "@/lib/whatsapp";
 
 export default function SolucoesPage() {
   const { collections, loading } = useCategoryCollections();
@@ -63,7 +64,7 @@ export default function SolucoesPage() {
               </Link>
             </Button>
             <Button size="lg" variant="outline" asChild>
-              <a href={siteConfig.contact.whatsapp} target="_blank" rel="noopener noreferrer">
+              <a href={buildWhatsappUrl(buildContactMessage())} target="_blank" rel="noreferrer noopener">
                 {siteConfig.ctaQuoteText}
               </a>
             </Button>

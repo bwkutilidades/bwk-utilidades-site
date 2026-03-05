@@ -7,6 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Layout } from "@/components/layout/Layout";
 import { siteConfig } from "@/config/site";
+import { isValidCnpj } from "@/lib/cnpj";
+import { buildQuoteMessage, buildWhatsappUrl } from "@/lib/whatsapp";
 
 const segments = [
   { icon: Hotel, name: "Hotéis e Pousadas" },
@@ -25,6 +27,7 @@ const steps = [
 export default function B2BPage() {
   const [formData, setFormData] = useState({
     company: "",
+    cnpj: "",
     segment: "",
     city: "",
     state: "",
@@ -36,12 +39,36 @@ export default function B2BPage() {
     phone: "",
     message: "",
   });
+  const [cnpjError, setCnpjError] = useState("");
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // In production, this would send to an API
-    const message = `*Solicitação B2B - BWK Utilidades*%0A%0A*Empresa:* ${formData.company}%0A*Segmento:* ${formData.segment}%0A*Cidade/UF:* ${formData.city} - ${formData.state}%0A*Itens:* ${formData.itemsOfInterest}%0A*Volume:* ${formData.estimatedVolume}%0A*Urgência:* ${formData.urgency}%0A%0A*Contato:* ${formData.contactName}%0A*Email:* ${formData.email}%0A*Tel:* ${formData.phone}%0A%0A*Mensagem:* ${formData.message}`;
-    window.open(`${siteConfig.contact.whatsapp}?text=${message}`, "_blank");
+    if (!isValidCnpj(formData.cnpj)) {
+      setCnpjError("CNPJ inválido. Verifique e tente novamente.");
+      return;
+    }
+
+    setCnpjError("");
+
+    const cityUf = [formData.city.trim(), formData.state.trim()]
+      .filter(Boolean)
+      .join("/");
+
+    const quoteMessage = buildQuoteMessage({
+      company: formData.company,
+      cnpj: formData.cnpj,
+      name: formData.contactName,
+      phone: formData.phone,
+      email: formData.email,
+      itemsNeed: formData.itemsOfInterest,
+      cityUf,
+      segment: formData.segment,
+      estimatedVolume: formData.estimatedVolume,
+      urgency: formData.urgency,
+      additionalMessage: formData.message,
+    });
+
+    window.open(buildWhatsappUrl(quoteMessage), "_blank", "noopener,noreferrer");
   };
   
   return (
@@ -154,15 +181,36 @@ export default function B2BPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="segment">Segmento *</Label>
+                  <Label htmlFor="cnpj">CNPJ *</Label>
                   <Input
-                    id="segment"
+                    id="cnpj"
                     required
-                    placeholder="Ex: Restaurante, Hotel..."
-                    value={formData.segment}
-                    onChange={(e) => setFormData({ ...formData, segment: e.target.value })}
+                    placeholder="00.000.000/0000-00"
+                    value={formData.cnpj}
+                    onChange={(e) => {
+                      setFormData({ ...formData, cnpj: e.target.value });
+                      if (cnpjError) setCnpjError("");
+                    }}
+                    aria-invalid={cnpjError ? "true" : "false"}
+                    aria-describedby={cnpjError ? "cnpj-error" : undefined}
                   />
+                  {cnpjError && (
+                    <p id="cnpj-error" className="text-sm text-destructive">
+                      {cnpjError}
+                    </p>
+                  )}
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="segment">Segmento *</Label>
+                <Input
+                  id="segment"
+                  required
+                  placeholder="Ex: Restaurante, Hotel..."
+                  value={formData.segment}
+                  onChange={(e) => setFormData({ ...formData, segment: e.target.value })}
+                />
               </div>
               
               <div className="grid sm:grid-cols-2 gap-4">

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/layout/Layout";
 import { siteConfig } from "@/config/site";
 import { categories } from "@/data/categories";
+import { buildContactMessage, buildWhatsappUrl } from "@/lib/whatsapp";
 
 export default function LicitacoesPage() {
   return (
@@ -83,7 +84,7 @@ export default function LicitacoesPage() {
           
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Button size="lg" variant="secondary" asChild>
-              <a href={siteConfig.contact.whatsapp} target="_blank" rel="noopener noreferrer">
+              <a href={buildWhatsappUrl(buildContactMessage())} target="_blank" rel="noreferrer noopener">
                 <Phone className="mr-2 h-5 w-5" />
                 {siteConfig.ctaQuoteText}
               </a>

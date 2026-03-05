@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Layout } from "@/components/layout/Layout";
 import { siteConfig } from "@/config/site";
+import { buildContactMessage, buildWhatsappUrl } from "@/lib/whatsapp";
 
 export default function ContatoPage() {
   const [form, setForm] = useState({
@@ -18,8 +19,7 @@ export default function ContatoPage() {
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const message = `*Contato - BWK Utilidades*%0A%0A*Nome:* ${form.name}%0A*Email:* ${form.email}%0A*Tel:* ${form.phone}%0A*Assunto:* ${form.subject}%0A%0A*Mensagem:* ${form.message}`;
-    window.open(`${siteConfig.contact.whatsapp}?text=${message}`, "_blank");
+    window.open(buildWhatsappUrl(buildContactMessage()), "_blank", "noopener,noreferrer");
   };
   
   return (
@@ -48,9 +48,9 @@ export default function ContatoPage() {
               
               <div className="space-y-6">
                 <a
-                  href={siteConfig.contact.whatsapp}
+                  href={buildWhatsappUrl(buildContactMessage())}
                   target="_blank"
-                  rel="noopener noreferrer"
+                  rel="noreferrer noopener"
                   className="flex items-start gap-4 p-4 bg-muted border border-border rounded-xl hover:bg-background transition-colors"
                 >
                   <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center flex-shrink-0">

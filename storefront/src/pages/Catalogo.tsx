@@ -10,6 +10,7 @@ import { apiClient } from "@/lib/api-client";
 import { getProductsByCollectionHandle, getCategoryLabel, validateCatalogCoverage } from "@/lib/shopify";
 import { categories } from "@/data/categories";
 import { siteConfig } from "@/config/site";
+import { buildContactMessage, buildWhatsappUrl } from "@/lib/whatsapp";
 import type { Product, CategorySlug, ListProductsParams } from "@/lib/types";
 
 const PRODUCTS_PER_PAGE = 24;
@@ -227,7 +228,7 @@ export default function CatalogoPage() {
                 <h2 className="text-xl md:text-2xl font-bold">Precisa de orçamento ou compra em volume?</h2>
               </div>
               <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90 w-fit">
-                <a href={siteConfig.contact.whatsapp} target="_blank" rel="noopener noreferrer">
+                <a href={buildWhatsappUrl(buildContactMessage())} target="_blank" rel="noreferrer noopener">
                   {siteConfig.ctaQuoteText}
                 </a>
               </Button>

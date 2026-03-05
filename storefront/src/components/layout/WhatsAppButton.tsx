@@ -1,12 +1,12 @@
 import { MessageCircle } from "lucide-react";
-import { siteConfig } from "@/config/site";
+import { buildContactMessage, buildWhatsappUrl } from "@/lib/whatsapp";
 
 export function WhatsAppButton() {
   return (
     <a
-      href={siteConfig.contact.whatsapp}
+      href={buildWhatsappUrl(buildContactMessage())}
       target="_blank"
-      rel="noopener noreferrer"
+      rel="noreferrer noopener"
       className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-[#25D366] hover:bg-[#20BA5C] text-white px-4 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 group"
       aria-label="Fale conosco pelo WhatsApp"
     >

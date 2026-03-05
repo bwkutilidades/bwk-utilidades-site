@@ -6,6 +6,7 @@ import { Layout } from "@/components/layout/Layout";
 import { ProductCard } from "@/components/products/ProductCard";
 import { CategoryCard } from "@/components/categories/CategoryCard";
 import { siteConfig } from "@/config/site";
+import { buildContactMessage, buildWhatsappUrl } from "@/lib/whatsapp";
 import { useShopifyFeaturedProducts } from "@/hooks/useShopifyProducts";
 import { useCategoryCollections } from "@/hooks/useCategoryCollections";
 
@@ -143,7 +144,7 @@ export default function HomePage() {
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild className="text-base bg-white/10 border-white/30 text-white hover:bg-white/20 hover:text-white">
-                <a href={siteConfig.contact.whatsapp} target="_blank" rel="noopener noreferrer">
+                <a href={buildWhatsappUrl(buildContactMessage())} target="_blank" rel="noreferrer noopener">
                   {siteConfig.ctaQuoteText}
                 </a>
               </Button>
@@ -344,7 +345,7 @@ export default function HomePage() {
                 Solicite um orçamento personalizado via WhatsApp ou formulário.
               </p>
               <Button variant="secondary" asChild>
-                <a href={siteConfig.contact.whatsapp} target="_blank" rel="noopener noreferrer">
+                <a href={buildWhatsappUrl(buildContactMessage())} target="_blank" rel="noreferrer noopener">
                   {siteConfig.ctaQuoteText}
                 </a>
               </Button>
