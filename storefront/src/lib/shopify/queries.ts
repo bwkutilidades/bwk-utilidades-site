@@ -315,7 +315,7 @@ export const COLLECTION_BY_HANDLE_QUERY = `
       title
       handle
       description
-      products(first: $first, after: $after, sortKey: CREATED_AT, reverse: true) {
+      products(first: $first, after: $after, sortKey: CREATED, reverse: true) {
         edges {
           node {
             ${PRODUCT_FRAGMENT}
