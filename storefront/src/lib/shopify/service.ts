@@ -16,7 +16,7 @@ import type {
     ShopifyProduct,
     ShopifyVariant,
 } from './types';
-import { CATEGORY_MAP, type CategoryHandle } from './categories';
+import { CATEGORY_MAP, CATEGORY_DESCRIPTIONS, type CategoryHandle } from './categories';
 import {
     resolveCategoryImageWithSource,
     slugifyCategoryKey,
@@ -117,9 +117,9 @@ function transformProduct(shopifyProduct: ShopifyProduct): Product {
 }
 
 const CATEGORY_ALIASES: Record<CategoryHandle, string[]> = {
-    'limpeza-e-higiene': ['limpeza-e-higiene', 'limpeza-higiene'],
-    'organizacao-e-utilidades': ['organizacao-e-utilidades', 'organizacao-utilidades'],
-    'cozinha-e-bar': ['cozinha-e-bar', 'cozinha-bar'],
+    'limpeza-e-higiene': ['limpeza-e-higiene', 'limpeza-higiene', 'limpeza', 'higiene', 'produtos-de-limpeza'],
+    'organizacao-e-utilidades': ['organizacao-e-utilidades', 'organizacao-utilidades', 'organizacao', 'utilidades'],
+    'cozinha-e-bar': ['cozinha-e-bar', 'cozinha-bar', 'cozinha', 'bar', 'utensilios'],
 };
 
 function normalizeCategoryCandidates(handle: string, title: string): string[] {
@@ -259,25 +259,34 @@ export async function getProductByHandle(handle: string): Promise<Product | null
 }
 
 /**
- * Get featured products from Shopify
- * Products tagged with "featured" or "destaque" will be prioritized
- * 
+ * Get featured products from Shopify.
+ *
+ * Strategy:
+ *  1. Query products tagged "destaque" (Portuguese — preferred)
+ *  2. If none found, query products tagged "featured" (English fallback)
+ *  3. If still none found, fall back to the most recent products
+ *
+ * To control which products appear here, tag them with "destaque" in
+ * Shopify Admin → Products → Tags.
+ *
  * @param limit - Number of products to return
  * @returns List of featured products
  */
 export async function getFeaturedProducts(limit = 8): Promise<Product[]> {
-    const result = await listProducts({ limit: limit * 2 }); // Fetch more to filter
-
-    // First, get products marked as featured
-    const featured = result.products.filter(p => p.featured);
-
-    // If not enough featured products, fill with regular products
-    if (featured.length >= limit) {
-        return featured.slice(0, limit);
+    if (!isShopifyConfigured()) {
+        return [];
     }
 
-    const nonFeatured = result.products.filter(p => !p.featured);
-    return [...featured, ...nonFeatured].slice(0, limit);
+    for (const tag of ['destaque', 'featured']) {
+        const result = await listProducts({ limit, search: `tag:${tag}` });
+        if (result.products.length > 0) {
+            return result.products.slice(0, limit);
+        }
+    }
+
+    // Fallback: return most recently created products
+    const fallback = await listProducts({ limit });
+    return fallback.products.slice(0, limit);
 }
 
 /**
@@ -318,6 +327,11 @@ export async function getProductsByCollectionHandle(
         return { products: [], hasNextPage: false, endCursor: null };
     }
 
+    // DIAGNÓSTICO: loga o handle enviado à API para facilitar depuração.
+    // Se a collection retornar vazia, compare este valor com os handles reais
+    // em: Shopify Admin → Products → Collections → (abrir collection) → URL.
+    console.log(`[Shopify] getProductsByCollectionHandle → handle="${handle}"`);
+
     try {
         const response = await shopifyFetch<CollectionByHandleQueryResponse>(COLLECTION_BY_HANDLE_QUERY, {
             handle,
@@ -326,9 +340,18 @@ export async function getProductsByCollectionHandle(
         });
 
         if (!response.collection) {
-            console.warn(`[Shopify Service] Collection '${handle}' not found`);
+            console.warn(
+                `[Shopify] Collection "${handle}" não encontrada na API.\n` +
+                `→ Verifique se o handle da collection no Shopify Admin corresponde a "${handle}".\n` +
+                `→ Caminho no Shopify: Admin → Products → Collections → (abrir) → campo "Handle" em "SEO".`,
+            );
             return { products: [], hasNextPage: false, endCursor: null };
         }
+
+        console.log(
+            `[Shopify] Collection "${handle}" encontrada: "${response.collection.title}" ` +
+            `(${response.collection.products.edges.length} produtos nesta página)`,
+        );
 
         const products = response.collection.products.edges.map(edge => transformProduct(edge.node));
 
@@ -371,7 +394,7 @@ export async function getCategoryCollections(): Promise<CategoryCollectionData[]
             return {
                 handle: cat.handle,
                 title: cat.label,
-                description: '',
+                description: CATEGORY_DESCRIPTIONS[cat.handle] || '',
                 imageUrl: resolvedImage.url,
                 imageAlt: cat.label,
                 imageSource: resolvedImage.source,
@@ -392,6 +415,15 @@ export async function getCategoryCollections(): Promise<CategoryCollectionData[]
         });
 
         const receivedCollections = response.collections.edges.map((edge) => edge.node);
+
+        // DIAGNÓSTICO: exibe todos os handles de collections retornados pelo Shopify.
+        // Se as categorias aparecerem sem produtos, compare estes handles com os
+        // slugs usados na URL (/catalogo?collection=<handle>).
+        console.log(
+            '[Shopify] Collections encontradas no Shopify:',
+            receivedCollections.map((c) => `${c.handle} ("${c.title}")`),
+        );
+
         const matchedCollections = new Map<CategoryHandle, CollectionMetadata>();
 
         for (const collection of receivedCollections) {
@@ -412,10 +444,17 @@ export async function getCategoryCollections(): Promise<CategoryCollectionData[]
                 resolvedTitle,
             );
 
+            // Use the curated local description as primary to avoid Shopify
+            // placeholder values (e.g. "Teste"). Falls back to Shopify description
+            // if no local description is defined for the handle.
+            const localDescription = CATEGORY_DESCRIPTIONS[cat.handle] || '';
+            const shopifyDescription = collectionData?.description?.trim() || '';
+            const description = localDescription || shopifyDescription;
+
             return {
                 handle: resolvedHandle,
                 title: resolvedTitle,
-                description: collectionData?.description || '',
+                description,
                 imageUrl: resolvedImage.url,
                 imageAlt: collectionData?.image?.altText || resolvedTitle,
                 imageSource: resolvedImage.source,
@@ -436,7 +475,7 @@ export async function getCategoryCollections(): Promise<CategoryCollectionData[]
             return {
                 handle: cat.handle,
                 title: cat.label,
-                description: '',
+                description: CATEGORY_DESCRIPTIONS[cat.handle] || '',
                 imageUrl: resolvedImage.url,
                 imageAlt: cat.label,
                 imageSource: resolvedImage.source,
