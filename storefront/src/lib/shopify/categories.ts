@@ -1,6 +1,6 @@
 /**
  * Shopify Collections Category Map
- * 
+ *
  * Maps frontend category labels to Shopify collection handles.
  * These handles must match the collections created in Shopify Admin.
  */
@@ -15,10 +15,21 @@ export const CATEGORY_MAP = [
 
 export type CategoryHandle = typeof CATEGORY_MAP[number]["handle"];
 
+/**
+ * Local descriptions for each category.
+ * Used as primary description on the homepage cards, overriding any
+ * placeholder text (e.g. "Teste") set in Shopify collection description.
+ */
+export const CATEGORY_DESCRIPTIONS: Record<CategoryHandle, string> = {
+    "limpeza-e-higiene": "Produtos essenciais para limpeza profissional e doméstica. Baldes, vassouras, rodos, esponjas e muito mais.",
+    "organizacao-e-utilidades": "Produtos para organização, descarte e utilidades do dia a dia.",
+    "cozinha-e-bar": "Utensílios de qualidade para cozinhas profissionais, bares e restaurantes. Copos, facas e acessórios.",
+};
+
 const CATEGORY_HANDLE_ALIASES: Record<CategoryHandle, string[]> = {
-    "limpeza-e-higiene": ["limpeza-e-higiene", "limpeza-higiene"],
-    "organizacao-e-utilidades": ["organizacao-e-utilidades", "organizacao-utilidades"],
-    "cozinha-e-bar": ["cozinha-e-bar", "cozinha-bar"],
+    "limpeza-e-higiene": ["limpeza-e-higiene", "limpeza-higiene", "limpeza", "higiene", "produtos-de-limpeza"],
+    "organizacao-e-utilidades": ["organizacao-e-utilidades", "organizacao-utilidades", "organizacao", "utilidades", "organização"],
+    "cozinha-e-bar": ["cozinha-e-bar", "cozinha-bar", "cozinha", "bar", "utensilios"],
 };
 
 /**

@@ -16,7 +16,7 @@ export {
     type ListProductsResult,
     type CategoryCollectionData,
 } from './service';
-export { CATEGORY_MAP, getCategoryLabel, getCategoryFallbackImage, CATEGORY_IMAGE_FALLBACK, type CategoryHandle } from './categories';
+export { CATEGORY_MAP, CATEGORY_DESCRIPTIONS, getCategoryLabel, getCategoryFallbackImage, CATEGORY_IMAGE_FALLBACK, type CategoryHandle } from './categories';
 export {
     createCart,
     getCart,
