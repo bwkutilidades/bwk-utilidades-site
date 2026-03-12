@@ -10,6 +10,7 @@ import { AddedToCartModal } from "@/components/cart/AddedToCartModal";
 import { useAddToCartModal } from "@/hooks/useAddToCartModal";
 import { apiClient } from "@/lib/api-client";
 import { formatPrice } from "@/lib/utils";
+import { pixelViewContent, pixelAddToCart } from "@/utils/pixel";
 import type { Product } from "@/lib/types";
 
 export default function ProductPage() {
@@ -49,8 +50,15 @@ export default function ProductPage() {
     setSelectedImageIndex(0);
   }, [slug]);
 
+  // Evento ViewContent — dispara quando o produto é carregado
+  useEffect(() => {
+    if (!product) return;
+    pixelViewContent(product);
+  }, [product?.id]);
+
   const handleAddToCart = () => {
     if (!product) return;
+    pixelAddToCart(product, quantity);
     addToCartWithModal(product, quantity, selectedVariant || undefined);
   };
 

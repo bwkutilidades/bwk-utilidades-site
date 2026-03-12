@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useAddToCartModal } from "@/hooks/useAddToCartModal";
 import { AddedToCartModal } from "@/components/cart/AddedToCartModal";
 import { formatPrice } from "@/lib/utils";
+import { pixelAddToCart } from "@/utils/pixel";
 import type { Product } from "@/lib/types";
 
 interface ProductCardProps {
@@ -15,6 +16,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
+    pixelAddToCart(product);
     addToCartWithModal(product, 1);
   };
 
