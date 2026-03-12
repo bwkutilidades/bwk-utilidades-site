@@ -1,13 +1,13 @@
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { CartProvider } from "@/contexts/CartContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Loader2 } from "lucide-react";
-import { useMetaPixel } from "@/hooks/useMetaPixel";
+import { trackPageView } from "@/lib/metaPixel";
 
 // Pages
 import Index from "./pages/Index";
@@ -33,13 +33,21 @@ const PageLoader = () => (
   </div>
 );
 
-// Componente interno — fica dentro do BrowserRouter para ter acesso ao useLocation
-function AppContent() {
-  useMetaPixel();
+// Dispara PageView a cada troca de rota — deve ficar dentro do BrowserRouter
+function PixelPageTracker() {
+  const location = useLocation();
+  useEffect(() => {
+    trackPageView();
+  }, [location.pathname]);
+  return null;
+}
 
+function AppContent() {
   return (
-    <Suspense fallback={<PageLoader />}>
-      <Routes>
+    <>
+      <PixelPageTracker />
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/solucoes" element={<Solucoes />} />
         <Route path="/solucoes/:categoria" element={<Category />} />
@@ -58,8 +66,9 @@ function AppContent() {
         <Route path="/privacidade" element={<PrivacidadePage />} />
         <Route path="/termos" element={<TermosPage />} />
         <Route path="*" element={<NotFound />} />
-      </Routes>
-    </Suspense>
+        </Routes>
+      </Suspense>
+    </>
   );
 }
 
