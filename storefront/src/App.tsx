@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CartProvider } from "@/contexts/CartContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Loader2 } from "lucide-react";
+import { useMetaPixel } from "@/hooks/useMetaPixel";
 
 // Pages
 import Index from "./pages/Index";
@@ -32,6 +33,36 @@ const PageLoader = () => (
   </div>
 );
 
+// Componente interno — fica dentro do BrowserRouter para ter acesso ao useLocation
+function AppContent() {
+  useMetaPixel();
+
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/solucoes" element={<Solucoes />} />
+        <Route path="/solucoes/:categoria" element={<Category />} />
+        <Route path="/b2b" element={<B2B />} />
+        <Route path="/licitacoes" element={<Licitacoes />} />
+        <Route path="/catalogo" element={<Catalogo />} />
+        <Route path="/produto/:slug" element={<Product />} />
+        <Route path="/carrinho" element={<Cart />} />
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/pedido/:orderId" element={<OrderConfirmation />} />
+        <Route path="/sobre" element={<Sobre />} />
+        <Route path="/contato" element={<Contato />} />
+        <Route path="/entregas" element={<EntregasPage />} />
+        <Route path="/trocas-e-devolucoes" element={<TrocasPage />} />
+        <Route path="/pagamentos" element={<PagamentosPage />} />
+        <Route path="/privacidade" element={<PrivacidadePage />} />
+        <Route path="/termos" element={<TermosPage />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Suspense>
+  );
+}
+
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
@@ -40,28 +71,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <Suspense fallback={<PageLoader />}>
-              <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/solucoes" element={<Solucoes />} />
-            <Route path="/solucoes/:categoria" element={<Category />} />
-            <Route path="/b2b" element={<B2B />} />
-            <Route path="/licitacoes" element={<Licitacoes />} />
-            <Route path="/catalogo" element={<Catalogo />} />
-            <Route path="/produto/:slug" element={<Product />} />
-            <Route path="/carrinho" element={<Cart />} />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/pedido/:orderId" element={<OrderConfirmation />} />
-            <Route path="/sobre" element={<Sobre />} />
-            <Route path="/contato" element={<Contato />} />
-            <Route path="/entregas" element={<EntregasPage />} />
-            <Route path="/trocas-e-devolucoes" element={<TrocasPage />} />
-            <Route path="/pagamentos" element={<PagamentosPage />} />
-            <Route path="/privacidade" element={<PrivacidadePage />} />
-            <Route path="/termos" element={<TermosPage />} />
-              <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Suspense>
+            <AppContent />
           </BrowserRouter>
         </CartProvider>
       </TooltipProvider>

@@ -6,6 +6,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { useCart } from "@/contexts/CartContext";
 import { useShopifyCheckout } from "@/hooks/useShopifyCheckout";
 import { formatPrice } from "@/lib/utils";
+import { pixelInitiateCheckout } from "@/utils/pixel";
 
 export function CartDrawer() {
   const { items, isOpen, setCartOpen, itemCount, subtotal, updateQuantity, removeItem } = useCart();
@@ -13,6 +14,7 @@ export function CartDrawer() {
 
   const handleCheckout = async () => {
     clearError();
+    pixelInitiateCheckout(items, subtotal);
     await startCheckout();
     // Note: startCheckout will redirect to Shopify, so we don't close the drawer
   };
