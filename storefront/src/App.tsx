@@ -1,4 +1,4 @@
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useRef } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -33,10 +33,13 @@ const PageLoader = () => (
   </div>
 );
 
-// Dispara PageView a cada troca de rota — deve ficar dentro do BrowserRouter
+// Dispara PageView a cada troca de rota — deve ficar dentro do BrowserRouter.
+// Pula o primeiro mount porque index.html já disparou o PageView inicial.
 function PixelPageTracker() {
   const location = useLocation();
+  const isFirst = useRef(true);
   useEffect(() => {
+    if (isFirst.current) { isFirst.current = false; return; }
     trackPageView();
   }, [location.pathname]);
   return null;
